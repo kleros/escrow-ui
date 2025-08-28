@@ -59,24 +59,29 @@ const StyledIconButton = styled(IconButton)`
   right: 0;
 `;
 
+const STORAGE_KEY = "@kleros/escrow-v1/alert/smart-contract-wallet-warning";
+const EIP7702_PREFIX = "0xef0100";
+
 export default function SmartContractWalletWarning() {
   const client = useClient();
   const { address } = useAccount();
   const [isSmartContractWallet, setIsSmartContractWallet] =
     useState<boolean>(false);
   const [showWarning, setShowWarning] = useLocalStorage<boolean>(
-    "@kleros/escrow-v1/alert/smart-contract-wallet-warning",
+    `${STORAGE_KEY}:${address}`,
     true
   );
 
   useEffect(() => {
-    if (address && client) {
-      getCode(client, {
-        address: address,
-      }).then((code) => {
-        setIsSmartContractWallet(!!code);
-      });
-    }
+    if (!address || !client) return;
+
+    getCode(client, { address }).then((code) => {
+      const formattedCode = code?.toLowerCase();
+      const isEIP7702 = formattedCode?.startsWith(EIP7702_PREFIX);
+
+      //Do not show warning for EIP-7702 EOAs.
+      setIsSmartContractWallet(!!code && !isEIP7702);
+    });
   }, [address, client]);
 
   if (!showWarning || !isSmartContractWallet) {
