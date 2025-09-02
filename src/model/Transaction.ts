@@ -1,3 +1,4 @@
+import type { ArbitratorInfo } from "./ArbitratorInfo";
 import type { MetaEvidence } from "./MetaEvidence";
 import type { TimelineEvent } from "./TimelineEvent";
 
@@ -44,6 +45,7 @@ export interface TransactionMini extends BaseTransaction {
 
 //Used for detailed view
 export interface Transaction extends BaseTransaction {
+  arbitratorInfo: ArbitratorInfo;
   amountInEscrow: string;
   disputeId: bigint;
   blockExplorerLink: string;

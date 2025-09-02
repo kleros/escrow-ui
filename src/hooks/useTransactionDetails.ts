@@ -31,6 +31,8 @@ import {
 } from "config/contracts/events";
 import type { Evidence } from "model/Evidence";
 import type { TimelineEvent } from "model/TimelineEvent";
+import type { ArbitratorInfo } from "model/ArbitratorInfo";
+import { KLEROS_LIQUID_ABI } from "config/contracts/abi/klerosLiquid";
 
 async function fetchDetails(
   client: Client,
@@ -45,12 +47,34 @@ async function fetchDetails(
   });
 }
 
-async function fetchArbitrator(client: Client, contractAddress: `0x${string}`) {
-  return await readContract(client, {
+async function fetchArbitratorInfo(
+  client: Client,
+  contractAddress: `0x${string}`
+) {
+  const transactionParams = {
     abi: addressToAbi(contractAddress),
     address: contractAddress,
-    functionName: "arbitrator" as const,
+  };
+
+  const [address, extraData] = await Promise.all([
+    await readContract(client, {
+      ...transactionParams,
+      functionName: "arbitrator" as const,
+    }),
+    await readContract(client, {
+      ...transactionParams,
+      functionName: "arbitratorExtraData" as const,
+    }),
+  ]);
+
+  const arbitrationCost = await readContract(client, {
+    address: address,
+    abi: KLEROS_LIQUID_ABI,
+    functionName: "arbitrationCost" as const,
+    args: [extraData],
   });
+
+  return { address, extraData, arbitrationCost };
 }
 
 async function fetchTimelineEvents(
@@ -179,6 +203,7 @@ function mapToTransaction(
   disputeId: bigint,
   blockTimestamp: bigint,
   contractAddress: `0x${string}`,
+  arbitratorInfo: ArbitratorInfo,
   metaEvidence: MetaEvidence,
   status: number,
   lastInteraction: number,
@@ -213,6 +238,7 @@ function mapToTransaction(
       day: "numeric",
     }),
     arbitrableAddress: contractAddress,
+    arbitratorInfo: arbitratorInfo,
     metaEvidence: metaEvidence,
     status: status,
     formattedStatus: mapTransactionStatus(
@@ -250,9 +276,9 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
     queryFn: async () => {
       if (!client) return undefined;
 
-      const [details, arbitratorAddress] = await Promise.all([
+      const [details, arbitratorInfo] = await Promise.all([
         fetchDetails(client, contractAddress, id),
-        fetchArbitrator(client, contractAddress),
+        fetchArbitratorInfo(client, contractAddress),
       ]);
 
       const disputeId = details[details.length - 5];
@@ -260,7 +286,7 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
       const timelineEventsLogs = await fetchTimelineEvents(
         client,
         contractAddress,
-        arbitratorAddress,
+        arbitratorInfo.address,
         id,
         disputeId as bigint
       );
@@ -311,6 +337,7 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
         disputeId as bigint,
         blockTimestamps[0], //we can rely on the order of Promise.all, so we can use the first timestamp for the createdAt date
         contractAddress,
+        arbitratorInfo,
         metaEvidence,
         details[details.length - 1] as number, // status
         Number(details[details.length - 2]), //last interaction
