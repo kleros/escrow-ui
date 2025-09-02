@@ -5,6 +5,7 @@ import Reimburse from "./Reimburse/Reimburse";
 import Execute from "./Execute/Execute";
 import { useState } from "react";
 import ErrorAlert from "./Common/ErrorAlert/ErrorAlert";
+import RaiseDispute from "./RaiseDispute/RaiseDispute";
 
 const Container = styled.div`
   display: flex;
@@ -15,6 +16,7 @@ const Container = styled.div`
 const ActionsContainer = styled.div`
   display: flex;
   justify-content: center;
+  gap: 16px;
 `;
 
 interface Props {
@@ -59,6 +61,10 @@ export default function Actions({ transaction, isBuyer }: Props) {
     transaction.status === TransactionStatus.NoDispute &&
     hasTimedOut;
 
+  //Show raise dispute button if there is no dispute already and the transaction has not timed out
+  const showRaiseDisputeButton =
+    transaction.status === TransactionStatus.NoDispute && !hasTimedOut;
+
   return (
     <Container>
       {isExecuteError && <ErrorAlert />}
@@ -91,6 +97,14 @@ export default function Actions({ transaction, isBuyer }: Props) {
             contractAddress={transaction.arbitrableAddress}
             isNative={transaction.metaEvidence.token?.ticker === "ETH"}
             setIsExecuteError={setIsExecuteError}
+          />
+        )}
+
+        {showRaiseDisputeButton && (
+          <RaiseDispute
+            transactionId={transaction.id}
+            contractAddress={transaction.arbitrableAddress}
+            arbitrationCost={transaction.arbitratorInfo.arbitrationCost}
           />
         )}
       </ActionsContainer>
