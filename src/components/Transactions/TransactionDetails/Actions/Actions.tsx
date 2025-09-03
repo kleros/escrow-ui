@@ -105,6 +105,8 @@ export default function Actions({ transaction, isBuyer }: Props) {
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
             arbitrationCost={transaction.arbitratorInfo.arbitrationCost}
+            isNative={transaction.metaEvidence.token?.ticker === "ETH"}
+            isBuyer={isBuyer}
           />
         )}
       </ActionsContainer>
