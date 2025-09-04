@@ -65,6 +65,14 @@ export default function Actions({ transaction, isBuyer }: Props) {
   const showRaiseDisputeButton =
     transaction.status === TransactionStatus.NoDispute && !hasTimedOut;
 
+  //Show deposit arbitration fee button (RaiseDispute component) to the user only if he is the party that needs to deposit the arbitration fee
+  const showDepositArbitrationFeeButton =
+    (transaction.status === TransactionStatus.WaitingSender && isBuyer) ||
+    (transaction.status === TransactionStatus.WaitingReceiver && !isBuyer);
+
+  const timeLeftToDepositFee =
+    transaction.lastInteraction + transaction.arbitrationInfo.feeTimeout;
+
   return (
     <Container>
       {isExecuteError && <ErrorAlert />}
@@ -100,13 +108,15 @@ export default function Actions({ transaction, isBuyer }: Props) {
           />
         )}
 
-        {showRaiseDisputeButton && (
+        {(showRaiseDisputeButton || showDepositArbitrationFeeButton) && (
           <RaiseDispute
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
-            arbitrationCost={transaction.arbitratorInfo.arbitrationCost}
+            arbitrationCost={transaction.arbitrationInfo.arbitrationCost}
             isNative={transaction.metaEvidence.token?.ticker === "ETH"}
             isBuyer={isBuyer}
+            hasToDepositFee={showDepositArbitrationFeeButton}
+            timeLeftToDepositFee={timeLeftToDepositFee}
           />
         )}
       </ActionsContainer>

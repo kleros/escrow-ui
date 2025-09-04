@@ -1,6 +1,6 @@
 import { Button } from "@kleros/ui-components-library";
 import { StyledModal } from "components/Common/Modal/StyledModal";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { StyledP } from "../Common/StyledElements/StyledElements";
 import { formatUnits } from "viem";
 import styled from "styled-components";
@@ -20,6 +20,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { isUserRejectedRequestError } from "utils/common";
 import { waitForTransactionReceipt } from "viem/actions";
 import { QUERY_KEYS } from "config/queryKeys";
+import Countdown from "react-countdown";
 
 const StyledButton = styled(Button)`
   align-self: center;
@@ -31,7 +32,37 @@ interface Props {
   arbitrationCost: bigint;
   isNative: boolean;
   isBuyer: boolean;
+  hasToDepositFee: boolean;
+  timeLeftToDepositFee: number;
 }
+
+const FeeDepositCoundown = React.memo(
+  ({ timeLeftToDepositFee }: { timeLeftToDepositFee: number }) => {
+    return (
+      <StyledP>
+        Time left:{" "}
+        <Countdown
+          date={timeLeftToDepositFee * 1000}
+          renderer={({ days, hours, minutes, seconds }) => {
+            return (
+              <span>
+                {days}d {hours}h {minutes}m {seconds}s
+              </span>
+            );
+          }}
+        />
+      </StyledP>
+    );
+  }
+);
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+`;
 
 export default function RaiseDispute({
   transactionId,
@@ -39,6 +70,8 @@ export default function RaiseDispute({
   arbitrationCost,
   isNative,
   isBuyer,
+  hasToDepositFee,
+  timeLeftToDepositFee,
 }: Props) {
   const queryClient = useQueryClient();
   const client = useClient();
@@ -168,18 +201,29 @@ export default function RaiseDispute({
 
         <StyledP>Arbitration cost: {formattedCost} ETH</StyledP>
 
-        <p>
-          By raising a dispute you are petitioning for the full remaining
-          balance.
-          <br />
-          You will need to pay the arbitration cost. This fee is refunded if you
-          win the dispute.
-          <br />
-          The dispute will be evaluated by the Kleros jurors.
-        </p>
+        {hasToDepositFee && (
+          <FeeDepositCoundown timeLeftToDepositFee={timeLeftToDepositFee} />
+        )}
+
+        {hasToDepositFee ? (
+          <p>
+            In order to not forfeit the value in escrow, you must deposit the
+            arbitration fee. It will be refunded if you win the dispute.
+          </p>
+        ) : (
+          <p>
+            By raising a dispute you are petitioning for the full remaining
+            balance.
+            <br />
+            You will need to deposit the arbitration cost. This is refunded if
+            you win the dispute.
+            <br />
+            The dispute will be evaluated by the Kleros jurors.
+          </p>
+        )}
 
         <StyledButton
-          text="Pay fee"
+          text="Deposit"
           small
           isDisabled={isPayingFee}
           isLoading={isPayingFee}
@@ -187,12 +231,18 @@ export default function RaiseDispute({
         />
       </StyledModal>
 
-      <Button
-        small
-        text="Raise dispute"
-        variant="tertiary"
-        onPress={() => setIsOpen(true)}
-      />
+      <ButtonContainer>
+        {hasToDepositFee && (
+          <FeeDepositCoundown timeLeftToDepositFee={timeLeftToDepositFee} />
+        )}
+
+        <Button
+          small
+          text={hasToDepositFee ? "Deposit arbitration fee" : "Raise dispute"}
+          variant="tertiary"
+          onPress={() => setIsOpen(true)}
+        />
+      </ButtonContainer>
     </>
   );
 }
