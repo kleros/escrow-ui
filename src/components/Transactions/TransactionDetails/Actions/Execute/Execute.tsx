@@ -34,21 +34,19 @@ export default function Execute({
     return {
       address: contractAddress as `0x${string}`,
       args: [transactionId],
+      account: address,
+      query: { enabled: false }, //Only simulate when we want
     } as const;
-  }, [transactionId, contractAddress]);
+  }, [contractAddress, transactionId, address]);
 
   const { refetch: refetchNativeSimulateData } =
     useSimulateMultipleArbitrableTransactionExecuteTransaction({
       ...transactionConfig,
-      account: address,
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { refetch: refetchTokenSimulateData } =
     useSimulateMultipleArbitrableTokenTransactionExecuteTransaction({
       ...transactionConfig,
-      account: address,
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { writeContractAsync: executeNativeTransaction } =

@@ -47,21 +47,19 @@ export default function Reimburse({
     return {
       address: contractAddress as `0x${string}`,
       args: [transactionId, parseUnits(amount.toString(), decimals)],
+      account: address,
+      query: { enabled: false }, //Only simulate when we want
     } as const;
-  }, [transactionId, amount, decimals, contractAddress]);
+  }, [contractAddress, transactionId, amount, decimals, address]);
 
   const { refetch: refetchReimburseNativeSimulateData } =
     useSimulateMultipleArbitrableTransactionReimburse({
       ...transactionConfig,
-      account: address,
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { refetch: refetchReimburseTokenSimulateData } =
     useSimulateMultipleArbitrableTokenTransactionReimburse({
       ...transactionConfig,
-      account: address,
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { writeContractAsync: reimburseNativeTransaction } =
