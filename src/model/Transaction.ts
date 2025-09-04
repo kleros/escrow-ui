@@ -14,6 +14,8 @@ export type FormattedTransactionStatus =
   | "Pending"
   | "Completed"
   | "Disputed"
+  | "Sender has to deposit arbitration fee"
+  | "Receiver has to deposit arbitration fee"
   | "Unknown";
 
 export enum DisputeRuling {
