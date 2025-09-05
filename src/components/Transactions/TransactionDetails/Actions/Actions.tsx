@@ -6,6 +6,7 @@ import Execute from "./Execute/Execute";
 import { useState } from "react";
 import ErrorAlert from "./Common/ErrorAlert/ErrorAlert";
 import RaiseDispute from "./RaiseDispute/RaiseDispute";
+import Withdraw from "./Withdraw/Withdraw";
 
 const Container = styled.div`
   display: flex;
@@ -25,7 +26,8 @@ interface Props {
 }
 
 export default function Actions({ transaction, isBuyer }: Props) {
-  const [isExecuteError, setIsExecuteError] = useState<boolean>(false);
+  //For actions that do not have their own modal to show an error
+  const [isActionError, setIsActionError] = useState<boolean>(false);
 
   const currentTime = Date.now() / 1000;
   const isInBufferPeriod =
@@ -70,12 +72,17 @@ export default function Actions({ transaction, isBuyer }: Props) {
     (transaction.status === TransactionStatus.WaitingSender && isBuyer) ||
     (transaction.status === TransactionStatus.WaitingReceiver && !isBuyer);
 
-  const timeLeftToDepositFee =
+  const depositFeeDeadline =
     transaction.lastInteraction + transaction.arbitrationInfo.feeTimeout;
+
+  //Show withdraw button if the user is the party that is waiting for the other to deposit the arbitration fee
+  const showWithdrawButton =
+    (transaction.status === TransactionStatus.WaitingSender && !isBuyer) ||
+    (transaction.status === TransactionStatus.WaitingReceiver && isBuyer);
 
   return (
     <Container>
-      {isExecuteError && <ErrorAlert />}
+      {isActionError && <ErrorAlert />}
 
       <ActionsContainer>
         {showPayButton && (
@@ -104,7 +111,7 @@ export default function Actions({ transaction, isBuyer }: Props) {
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
             isNative={transaction.metaEvidence.token?.ticker === "ETH"}
-            setIsExecuteError={setIsExecuteError}
+            setIsExecuteError={setIsActionError}
           />
         )}
 
@@ -116,7 +123,18 @@ export default function Actions({ transaction, isBuyer }: Props) {
             isNative={transaction.metaEvidence.token?.ticker === "ETH"}
             isBuyer={isBuyer}
             hasToDepositFee={showDepositArbitrationFeeButton}
-            timeLeftToDepositFee={timeLeftToDepositFee}
+            depositFeeDeadline={depositFeeDeadline}
+          />
+        )}
+
+        {showWithdrawButton && (
+          <Withdraw
+            transactionId={transaction.id}
+            contractAddress={transaction.arbitrableAddress}
+            isNative={transaction.metaEvidence.token?.ticker === "ETH"}
+            isBuyer={isBuyer}
+            depositFeeDeadline={depositFeeDeadline}
+            setIsWithdrawError={setIsActionError}
           />
         )}
       </ActionsContainer>

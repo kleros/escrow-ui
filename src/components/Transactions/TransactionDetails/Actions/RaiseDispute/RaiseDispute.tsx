@@ -1,7 +1,10 @@
 import { Button } from "@kleros/ui-components-library";
 import { StyledModal } from "components/Common/Modal/StyledModal";
-import React, { useMemo, useState } from "react";
-import { StyledP } from "../Common/StyledElements/StyledElements";
+import { useMemo, useState } from "react";
+import {
+  CustomActionButtonContainer,
+  StyledP,
+} from "../Common/StyledElements/StyledElements";
 import { formatUnits } from "viem";
 import styled from "styled-components";
 import {
@@ -20,7 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { isUserRejectedRequestError } from "utils/common";
 import { waitForTransactionReceipt } from "viem/actions";
 import { QUERY_KEYS } from "config/queryKeys";
-import Countdown from "react-countdown";
+import FeeDepositCoundown from "../Common/FeeDepositCountdown/FeeDepositCountdown";
 
 const StyledButton = styled(Button)`
   align-self: center;
@@ -33,36 +36,8 @@ interface Props {
   isNative: boolean;
   isBuyer: boolean;
   hasToDepositFee: boolean;
-  timeLeftToDepositFee: number;
+  depositFeeDeadline: number;
 }
-
-const FeeDepositCoundown = React.memo(
-  ({ timeLeftToDepositFee }: { timeLeftToDepositFee: number }) => {
-    return (
-      <StyledP>
-        Time left:{" "}
-        <Countdown
-          date={timeLeftToDepositFee * 1000}
-          renderer={({ days, hours, minutes, seconds }) => {
-            return (
-              <span>
-                {days}d {hours}h {minutes}m {seconds}s
-              </span>
-            );
-          }}
-        />
-      </StyledP>
-    );
-  }
-);
-
-const ButtonContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-`;
 
 export default function RaiseDispute({
   transactionId,
@@ -71,7 +46,7 @@ export default function RaiseDispute({
   isNative,
   isBuyer,
   hasToDepositFee,
-  timeLeftToDepositFee,
+  depositFeeDeadline,
 }: Props) {
   const queryClient = useQueryClient();
   const client = useClient();
@@ -202,7 +177,7 @@ export default function RaiseDispute({
         <StyledP>Arbitration cost: {formattedCost} ETH</StyledP>
 
         {hasToDepositFee && (
-          <FeeDepositCoundown timeLeftToDepositFee={timeLeftToDepositFee} />
+          <FeeDepositCoundown depositFeeDeadline={depositFeeDeadline} />
         )}
 
         {hasToDepositFee ? (
@@ -231,9 +206,9 @@ export default function RaiseDispute({
         />
       </StyledModal>
 
-      <ButtonContainer>
+      <CustomActionButtonContainer>
         {hasToDepositFee && (
-          <FeeDepositCoundown timeLeftToDepositFee={timeLeftToDepositFee} />
+          <FeeDepositCoundown depositFeeDeadline={depositFeeDeadline} />
         )}
 
         <Button
@@ -242,7 +217,7 @@ export default function RaiseDispute({
           variant="tertiary"
           onPress={() => setIsOpen(true)}
         />
-      </ButtonContainer>
+      </CustomActionButtonContainer>
     </>
   );
 }

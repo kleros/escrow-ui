@@ -14,4 +14,13 @@ export const StyledNumberField = styled(NumberField)`
 
 export const StyledP = styled.p`
   font-weight: bold;
+  text-align: justify;
+`;
+
+export const CustomActionButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
 `;
