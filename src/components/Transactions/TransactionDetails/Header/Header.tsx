@@ -6,7 +6,7 @@ const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  overflow: hidden;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.xs}) {
     flex-direction: column;
@@ -18,6 +18,9 @@ const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
 `;
 
 const BlockExplorerLink = styled.a`
