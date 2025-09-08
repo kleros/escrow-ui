@@ -7,6 +7,7 @@ import { useState } from "react";
 import ErrorAlert from "./Common/ErrorAlert/ErrorAlert";
 import RaiseDispute from "./RaiseDispute/RaiseDispute";
 import Withdraw from "./Withdraw/Withdraw";
+import OngoingDisputeInfo from "./OngoingDisputeInfo/OngoingDisputeInfo";
 
 const Container = styled.div`
   display: flex;
@@ -80,6 +81,9 @@ export default function Actions({ transaction, isBuyer }: Props) {
     (transaction.status === TransactionStatus.WaitingSender && !isBuyer) ||
     (transaction.status === TransactionStatus.WaitingReceiver && isBuyer);
 
+  const ongoingDispute =
+    transaction.status === TransactionStatus.DisputeCreated;
+
   return (
     <Container>
       {isActionError && <ErrorAlert />}
@@ -136,6 +140,10 @@ export default function Actions({ transaction, isBuyer }: Props) {
             depositFeeDeadline={depositFeeDeadline}
             setIsWithdrawError={setIsActionError}
           />
+        )}
+
+        {ongoingDispute && (
+          <OngoingDisputeInfo disputeId={transaction.disputeId} />
         )}
       </ActionsContainer>
     </Container>
