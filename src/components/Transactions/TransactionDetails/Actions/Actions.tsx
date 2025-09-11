@@ -8,6 +8,7 @@ import ErrorAlert from "./Common/ErrorAlert/ErrorAlert";
 import RaiseDispute from "./RaiseDispute/RaiseDispute";
 import Withdraw from "./Withdraw/Withdraw";
 import OngoingDisputeInfo from "./OngoingDisputeInfo/OngoingDisputeInfo";
+import { DisputeStatus } from "model/Dispute";
 
 const Container = styled.div`
   display: flex;
@@ -82,7 +83,8 @@ export default function Actions({ transaction, isBuyer }: Props) {
     (transaction.status === TransactionStatus.WaitingReceiver && isBuyer);
 
   const ongoingDispute =
-    transaction.status === TransactionStatus.DisputeCreated;
+    transaction.status === TransactionStatus.DisputeCreated &&
+    transaction.disputeInfo.disputeStatus !== DisputeStatus.Solved;
 
   return (
     <Container>
@@ -143,7 +145,11 @@ export default function Actions({ transaction, isBuyer }: Props) {
         )}
 
         {ongoingDispute && (
-          <OngoingDisputeInfo disputeId={transaction.disputeId} />
+          <OngoingDisputeInfo
+            disputeId={transaction.disputeId}
+            disputeInfo={transaction.disputeInfo}
+            isBuyer={isBuyer}
+          />
         )}
       </ActionsContainer>
     </Container>
