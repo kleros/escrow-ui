@@ -11,11 +11,9 @@ import {
 } from "config/contracts/events";
 import { formatUnits } from "viem";
 import { addressToShortString, getBlockExplorerLink } from "./common";
-import {
-  DisputeRuling,
-  type FormattedTransactionStatus,
-} from "model/Transaction";
+import { type FormattedTransactionStatus } from "model/Transaction";
 import type { Evidence } from "model/Evidence";
+import { DisputeRuling } from "model/Dispute";
 
 export const mapTransactionStatus = (
   backendStatus: string,

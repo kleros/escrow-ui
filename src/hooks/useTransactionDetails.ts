@@ -33,6 +33,7 @@ import type { Evidence } from "model/Evidence";
 import type { TimelineEvent } from "model/TimelineEvent";
 import type { ArbitrationInfo } from "model/ArbitrationInfo";
 import { KLEROS_LIQUID_ABI } from "config/contracts/abi/klerosLiquid";
+import type { DisputeInfo } from "model/Dispute";
 
 async function fetchDetails(
   client: Client,
@@ -170,6 +171,52 @@ async function fetchTimelineEvents(
   return ordered;
 }
 
+async function fetchDisputeInfo(
+  client: Client,
+  disputeId: bigint,
+  arbitratorAddress: `0x${string}`,
+  arbitratorExtraData: `0x${string}`
+) {
+  const transactionParams = {
+    abi: KLEROS_LIQUID_ABI,
+    address: arbitratorAddress,
+  };
+
+  const [disputeStatus, currentRuling, appealCost, appealPeriod] =
+    await Promise.all([
+      await readContract(client, {
+        ...transactionParams,
+        functionName: "disputeStatus" as const,
+        args: [disputeId],
+      }),
+      await readContract(client, {
+        ...transactionParams,
+        functionName: "currentRuling" as const,
+        args: [disputeId],
+      }),
+      await readContract(client, {
+        ...transactionParams,
+        functionName: "appealCost" as const,
+        args: [disputeId, arbitratorExtraData],
+      }),
+      await readContract(client, {
+        ...transactionParams,
+        functionName: "appealPeriod" as const,
+        args: [disputeId],
+      }),
+    ]);
+
+  return {
+    disputeStatus,
+    currentRuling: Number(currentRuling),
+    appealCost,
+    appealPeriod: {
+      start: Number(appealPeriod[0]),
+      end: Number(appealPeriod[1]),
+    },
+  };
+}
+
 async function fetchMetaEvidenceContent(log: MetaEvidenceLogs[0]) {
   try {
     if (!log.args._evidence) return null;
@@ -214,6 +261,7 @@ function mapToTransaction(
   blockTimestamp: bigint,
   contractAddress: `0x${string}`,
   arbitrationInfo: ArbitrationInfo,
+  disputeInfo: DisputeInfo,
   metaEvidence: MetaEvidence,
   status: number,
   lastInteraction: number,
@@ -249,6 +297,7 @@ function mapToTransaction(
     }),
     arbitrableAddress: contractAddress,
     arbitrationInfo: arbitrationInfo,
+    disputeInfo: disputeInfo,
     metaEvidence: metaEvidence,
     status: status,
     formattedStatus: mapTransactionStatus(
@@ -308,8 +357,14 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
         (log) => log.eventName === evidenceEvent.name
       );
 
-      const [metaEvidence, evidenceContent, blockTimestamps] =
+      const [disputeInfo, metaEvidence, evidenceContent, blockTimestamps] =
         await Promise.all([
+          fetchDisputeInfo(
+            client,
+            disputeId as bigint,
+            arbitrationInfo.arbitratorAddress,
+            arbitrationInfo.arbitratorExtraData
+          ),
           fetchMetaEvidenceContent(metaEvidenceLog),
           fetchEvidenceContent(evidenceLogs),
           fetchBlockTimestamps(
@@ -348,6 +403,7 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
         blockTimestamps[0], //we can rely on the order of Promise.all, so we can use the first timestamp for the createdAt date
         contractAddress,
         arbitrationInfo,
+        disputeInfo,
         metaEvidence,
         details[details.length - 1] as number, // status
         Number(details[details.length - 2]), //last interaction

@@ -1,4 +1,5 @@
 import type { ArbitrationInfo } from "./ArbitrationInfo";
+import type { DisputeInfo } from "./Dispute";
 import type { MetaEvidence } from "./MetaEvidence";
 import type { TimelineEvent } from "./TimelineEvent";
 
@@ -17,12 +18,6 @@ export type FormattedTransactionStatus =
   | "Sender has to deposit arbitration fee"
   | "Receiver has to deposit arbitration fee"
   | "Unknown";
-
-export enum DisputeRuling {
-  "Jurors refused to arbitrate",
-  "Jurors ruled in favor of the sender",
-  "Jurors ruled in favor of the receiver",
-}
 
 //This value is used in the old frontend to indicate no timeout, so it is necessary to maintain backwards compatibility.
 export const NO_TIMEOUT_VALUE_OLD_FRONTEND = 8640000000000000;
@@ -48,6 +43,7 @@ export interface TransactionMini extends BaseTransaction {
 //Used for detailed view
 export interface Transaction extends BaseTransaction {
   arbitrationInfo: ArbitrationInfo;
+  disputeInfo: DisputeInfo;
   amountInEscrow: string;
   disputeId: bigint;
   blockExplorerLink: string;
