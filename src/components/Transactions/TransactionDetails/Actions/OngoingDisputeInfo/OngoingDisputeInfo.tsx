@@ -2,8 +2,7 @@ import { useAccount } from "wagmi";
 import { StyledP } from "../Common/StyledElements/StyledElements";
 import styled from "styled-components";
 import { DisputeRuling, DisputeStatus, type DisputeInfo } from "model/Dispute";
-import TiedDisputeInfo from "./Rulings/TiedDisputeInfo/TiedDisputeInfo";
-import LoserDisputeInfo from "./Rulings/LoserDisputeInfo/LoserDisputeInfo";
+import AppealableDisputeInfo from "./Rulings/AppealableDisputeInfo/AppealableDisputeInfo";
 import WinnerDisputeInfo from "./Rulings/WinnerDisputeInfo/WinnerDisputeInfo";
 
 interface Props {
@@ -68,13 +67,16 @@ export default function OngoingDisputeInfo({
       disputeInfo.currentRuling ===
         DisputeRuling["Jurors ruled in favor of the sender"]);
 
-  if (showTiedInformation) {
-    return <TiedDisputeInfo />;
+  //In effect, both are the same. In both scenarios, appeal is possible.
+  if (showTiedInformation || showLoserInformation) {
+    return (
+      <AppealableDisputeInfo
+        appealCost={disputeInfo.appealCost}
+        appealPeriod={disputeInfo.appealPeriod}
+        isLoser={showLoserInformation}
+      />
+    );
   }
 
-  if (showLoserInformation) {
-    return <LoserDisputeInfo />;
-  }
-
-  return <WinnerDisputeInfo />;
+  return <WinnerDisputeInfo appealPeriod={disputeInfo.appealPeriod} />;
 }
