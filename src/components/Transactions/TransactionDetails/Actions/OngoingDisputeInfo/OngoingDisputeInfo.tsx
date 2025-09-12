@@ -6,9 +6,13 @@ import AppealableDisputeInfo from "./Rulings/AppealableDisputeInfo/AppealableDis
 import WinnerDisputeInfo from "./Rulings/WinnerDisputeInfo/WinnerDisputeInfo";
 
 interface Props {
+  transactionId: bigint;
+  contractAddress: string;
+  isNative: boolean;
   disputeId: bigint;
   disputeInfo: DisputeInfo;
   isBuyer: boolean;
+  setIsAppealError: (isError: boolean) => void;
 }
 
 const defaultLinkProps = {
@@ -26,9 +30,13 @@ const StyledA = styled.a`
 `;
 
 export default function OngoingDisputeInfo({
+  transactionId,
+  contractAddress,
+  isNative,
   disputeId,
   disputeInfo,
   isBuyer,
+  setIsAppealError,
 }: Props) {
   const { chainId } = useAccount();
 
@@ -71,9 +79,13 @@ export default function OngoingDisputeInfo({
   if (showTiedInformation || showLoserInformation) {
     return (
       <AppealableDisputeInfo
+        transactionId={transactionId}
+        contractAddress={contractAddress}
+        isNative={isNative}
         appealCost={disputeInfo.appealCost}
         appealPeriod={disputeInfo.appealPeriod}
         isLoser={showLoserInformation}
+        setIsAppealError={setIsAppealError}
       />
     );
   }

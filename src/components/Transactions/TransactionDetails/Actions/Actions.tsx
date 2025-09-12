@@ -146,9 +146,13 @@ export default function Actions({ transaction, isBuyer }: Props) {
 
         {ongoingDispute && (
           <OngoingDisputeInfo
+            transactionId={transaction.id}
+            contractAddress={transaction.arbitrableAddress}
+            isNative={transaction.metaEvidence.token?.ticker === "ETH"}
             disputeId={transaction.disputeId}
             disputeInfo={transaction.disputeInfo}
             isBuyer={isBuyer}
+            setIsAppealError={setIsActionError}
           />
         )}
       </ActionsContainer>
