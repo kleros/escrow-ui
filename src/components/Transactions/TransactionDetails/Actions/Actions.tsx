@@ -19,7 +19,12 @@ const Container = styled.div`
 const ActionsContainer = styled.div`
   display: flex;
   justify-content: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.xs}) {
+    gap: 1rem;
+  }
 `;
 
 interface Props {
