@@ -27,6 +27,7 @@ interface Props {
     end: number;
   };
   isLoser: boolean;
+  isAwaitingRulingExecution: boolean;
   setIsAppealError: (isError: boolean) => void;
 }
 
@@ -37,6 +38,7 @@ export default function AppealableDisputeInfo({
   appealCost,
   appealPeriod,
   isLoser,
+  isAwaitingRulingExecution,
   setIsAppealError,
 }: Props) {
   const queryClient = useQueryClient();
@@ -131,14 +133,23 @@ export default function AppealableDisputeInfo({
       <StyledH1>
         {isLoser ? "You lost the dispute." : "Jurors refused to arbitrate."}
       </StyledH1>
-      <AppealInfo appealPeriod={appealPeriod} />
-      <Button
-        small
-        text="Appeal"
-        isDisabled={isAppealing}
-        isLoading={isAppealing}
-        onPress={handleAppeal}
-      />
+      {isAwaitingRulingExecution ? (
+        <p>
+          The dispute has been resolved and appeal is no longer possible. The
+          ruling is awaiting execution.
+        </p>
+      ) : (
+        <>
+          <AppealInfo appealPeriod={appealPeriod} />
+          <Button
+            small
+            text="Appeal"
+            isDisabled={isAppealing}
+            isLoading={isAppealing}
+            onPress={handleAppeal}
+          />
+        </>
+      )}
     </RulingContainer>
   );
 }

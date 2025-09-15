@@ -86,6 +86,10 @@ export default function Actions({ transaction, isBuyer }: Props) {
     transaction.status === TransactionStatus.DisputeCreated &&
     transaction.disputeInfo.disputeStatus !== DisputeStatus.Solved;
 
+  const waitingRulingExecution =
+    transaction.status !== TransactionStatus.Resolved &&
+    transaction.disputeInfo.disputeStatus === DisputeStatus.Solved;
+
   return (
     <Container>
       {isActionError && <ErrorAlert />}
@@ -144,7 +148,7 @@ export default function Actions({ transaction, isBuyer }: Props) {
           />
         )}
 
-        {ongoingDispute && (
+        {(ongoingDispute || waitingRulingExecution) && (
           <OngoingDisputeInfo
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
@@ -152,6 +156,7 @@ export default function Actions({ transaction, isBuyer }: Props) {
             disputeId={transaction.disputeId}
             disputeInfo={transaction.disputeInfo}
             isBuyer={isBuyer}
+            isAwaitingRulingExecution={waitingRulingExecution}
             setIsAppealError={setIsActionError}
           />
         )}

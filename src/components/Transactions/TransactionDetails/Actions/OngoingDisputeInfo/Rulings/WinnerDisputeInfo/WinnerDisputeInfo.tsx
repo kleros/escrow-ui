@@ -9,13 +9,24 @@ interface Props {
     start: number;
     end: number;
   };
+  isAwaitingRulingExecution: boolean;
 }
 
-export default function WinnerDisputeInfo({ appealPeriod }: Props) {
+export default function WinnerDisputeInfo({
+  appealPeriod,
+  isAwaitingRulingExecution,
+}: Props) {
   return (
     <RulingContainer>
       <StyledH1>Congratulations, you won the dispute!</StyledH1>
-      <AppealInfo isWinner appealPeriod={appealPeriod} />
+      {isAwaitingRulingExecution ? (
+        <p>
+          The dispute has been resolved and appeal is no longer possible. The
+          ruling is awaiting execution.
+        </p>
+      ) : (
+        <AppealInfo isWinner appealPeriod={appealPeriod} />
+      )}
     </RulingContainer>
   );
 }

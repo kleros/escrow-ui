@@ -12,6 +12,7 @@ interface Props {
   disputeId: bigint;
   disputeInfo: DisputeInfo;
   isBuyer: boolean;
+  isAwaitingRulingExecution: boolean;
   setIsAppealError: (isError: boolean) => void;
 }
 
@@ -36,6 +37,7 @@ export default function OngoingDisputeInfo({
   disputeId,
   disputeInfo,
   isBuyer,
+  isAwaitingRulingExecution,
   setIsAppealError,
 }: Props) {
   const { chainId } = useAccount();
@@ -85,10 +87,16 @@ export default function OngoingDisputeInfo({
         appealCost={disputeInfo.appealCost}
         appealPeriod={disputeInfo.appealPeriod}
         isLoser={showLoserInformation}
+        isAwaitingRulingExecution={isAwaitingRulingExecution}
         setIsAppealError={setIsAppealError}
       />
     );
   }
 
-  return <WinnerDisputeInfo appealPeriod={disputeInfo.appealPeriod} />;
+  return (
+    <WinnerDisputeInfo
+      appealPeriod={disputeInfo.appealPeriod}
+      isAwaitingRulingExecution={isAwaitingRulingExecution}
+    />
+  );
 }
