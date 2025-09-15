@@ -133,7 +133,7 @@ async function fetchTimelineEvents(
       toBlock: "latest",
     }),
     await getLogs(client, {
-      address: contractAddress,
+      address: arbitratorAddress,
       event: appealDecisionEvent,
       args: { _disputeID: disputeId, _arbitrable: contractAddress },
       fromBlock: 0n,
