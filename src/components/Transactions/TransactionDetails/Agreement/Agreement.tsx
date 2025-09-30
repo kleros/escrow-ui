@@ -2,14 +2,13 @@ import styled from "styled-components";
 import { getIpfsUrl } from "utils/ipfs";
 import DocIcon from "assets/doc.svg?react";
 
-const Title = styled.h1`
-  font-size: 1.5em;
+const StyledP = styled.p`
   font-weight: bold;
-  word-break: break-all;
+  word-break: break-word;
 `;
 
 const Description = styled.p`
-  word-break: break-all;
+  word-break: break-word;
   white-space: pre-wrap;
 `;
 
@@ -25,25 +24,33 @@ const StyledA = styled.a`
 `;
 
 interface Props {
-  title: string;
   description: string;
   agreementDocURI?: string;
+  useIpfs?: boolean;
 }
 
+const getDocumentUrl = (uri: string, useIpfs: boolean) => {
+  if (!useIpfs) {
+    return uri;
+  }
+
+  return getIpfsUrl(uri);
+};
+
 export default function Agreement({
-  title,
   description,
   agreementDocURI,
+  useIpfs = true,
 }: Props) {
   return (
     <>
-      <Title>{title}</Title>
+      <StyledP>Terms</StyledP>
 
       <Description>{description}</Description>
 
       {agreementDocURI && (
         <StyledA
-          href={getIpfsUrl(agreementDocURI)}
+          href={getDocumentUrl(agreementDocURI, useIpfs)}
           target="_blank"
           rel="noopener noreferrer"
         >

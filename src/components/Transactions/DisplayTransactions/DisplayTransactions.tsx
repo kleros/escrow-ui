@@ -3,13 +3,25 @@ import TransactionCard from "../TransactionCard/TransactionCard";
 import styled from "styled-components";
 import { BaseSkeleton } from "components/Common/Skeleton/BaseSkeleton";
 import { useMemo, useState } from "react";
-import { Searchbar } from "@kleros/ui-components-library";
+import { Button, Searchbar } from "@kleros/ui-components-library";
+import { useNavigate } from "react-router";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 80%;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    flex-direction: column;
+    justify-content: center;
+  }
 `;
 
 const StyledSearchbar = styled(Searchbar)`
@@ -34,6 +46,7 @@ const SkeletonCard = styled(BaseSkeleton)`
 export default function DisplayTransactions() {
   const { data: transactions, isFetching } = useTransactions();
   const [search, setSearch] = useState<string>("");
+  const navigate = useNavigate();
 
   //Allow users to filter transactions by title or address
   const filteredTransactions = useMemo(() => {
@@ -50,12 +63,16 @@ export default function DisplayTransactions() {
 
   return (
     <Container>
-      <StyledSearchbar
-        aria-label="Search by title or address"
-        placeholder="Search by title or address"
-        value={search}
-        onChange={(value) => setSearch(value)}
-      />
+      <Header>
+        <StyledSearchbar
+          aria-label="Search by title or address"
+          placeholder="Search by title or address"
+          value={search}
+          onChange={(value) => setSearch(value)}
+        />
+
+        <Button text="Create transaction" onPress={() => navigate("/new")} />
+      </Header>
 
       <CardContainer>
         {isFetching

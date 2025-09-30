@@ -21,6 +21,10 @@ const Container = styled.footer`
     color: #becce5;
     font-size: 14px;
   }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.xs}) {
+    justify-content: center;
+  }
 `;
 
 export default function Footer() {

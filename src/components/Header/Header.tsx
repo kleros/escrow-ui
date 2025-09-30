@@ -35,6 +35,10 @@ const OptionsContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.xs}) {
+    gap: 0px;
+  }
 `;
 
 export default function Header() {

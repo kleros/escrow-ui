@@ -1,23 +1,13 @@
-import styled from "styled-components";
 import { AlertMessage } from "@kleros/ui-components-library";
 import { useAccount } from "wagmi";
 import DisplayTransactions from "components/Transactions/DisplayTransactions/DisplayTransactions";
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 16px;
-  align-items: center;
-  overflow-y: auto;
-  padding: 8px 16px;
-`;
+import { DefaultPageContainer } from "components/Common/Containers/DefaultPageContainer";
 
 export default function Home() {
   const { isConnected } = useAccount();
 
   return (
-    <Container>
+    <DefaultPageContainer>
       {!isConnected ? (
         <AlertMessage
           className="w-fit"
@@ -28,6 +18,6 @@ export default function Home() {
       ) : (
         <DisplayTransactions />
       )}
-    </Container>
+    </DefaultPageContainer>
   );
 }

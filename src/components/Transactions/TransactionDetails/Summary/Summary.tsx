@@ -1,26 +1,13 @@
 import styled from "styled-components";
-import { DisplaySmall } from "@kleros/ui-components-library";
+import { StyledDisplaySmall } from "components/Common/Form/StyledDisplaySmall";
 import { addressToShortString } from "utils/common";
+import { formatDeadlineDate } from "utils/transaction";
 
 const Container = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
-    justify-content: center;
-  }
-`;
-
-const StyledDisplaySmall = styled(DisplaySmall)`
-  overflow: hidden;
-  white-space: nowrap;
-  height: fit-content;
-
-  label {
-    font-weight: bold;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  justify-items: center;
 `;
 
 interface Props {
@@ -29,6 +16,8 @@ interface Props {
   ticker: string;
   sender: string;
   receiver: string;
+  deadline?: string;
+  expiryTime: number;
 }
 
 export default function Summary({
@@ -37,6 +26,8 @@ export default function Summary({
   ticker,
   sender,
   receiver,
+  deadline,
+  expiryTime,
 }: Props) {
   return (
     <Container>
@@ -57,9 +48,25 @@ export default function Summary({
         text={addressToShortString(sender)}
         Icon={() => <></>}
       />
+
       <StyledDisplaySmall
         label="Receiver"
         text={addressToShortString(receiver)}
+        Icon={() => <></>}
+      />
+
+      {/* Deadline is optional to maintain backwards compatibility with old frontend. */}
+      {deadline && (
+        <StyledDisplaySmall
+          label="Delivery deadline (UTC)"
+          text={formatDeadlineDate(new Date(deadline))}
+          Icon={() => <></>}
+        />
+      )}
+
+      <StyledDisplaySmall
+        label="Escrow expiry (UTC)"
+        text={formatDeadlineDate(new Date(expiryTime * 1000))}
         Icon={() => <></>}
       />
     </Container>

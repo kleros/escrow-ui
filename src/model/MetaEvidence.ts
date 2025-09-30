@@ -9,14 +9,14 @@ interface Token {
 interface RulingOptions {
   descriptions: string[];
   titles: string[];
-  type: "single-select" | "multiple-select0" | "uint" | "int" | "string";
+  type: string;
 }
 
 interface ExtraData {
   Address?: string;
   Blockchain?: string;
   "Cryptoasset Description"?: string;
-  "Due Date (Local Time)"?: string;
+  "Due Date (Local Time)"?: string; //This is optional to maintain backwards compatibility. It is required in the new frontend.
   "Contract Information"?: string;
 }
 

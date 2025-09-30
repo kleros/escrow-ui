@@ -1,7 +1,7 @@
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS } from "config/contracts/addresses";
-import type { Client } from "viem";
+import { BaseError, type Client } from "viem";
 import { getBlock } from "viem/actions";
 
 export function addressToShortString(address: string) {
@@ -40,5 +40,18 @@ export async function fetchBlockTimestamps(
       const block = await getBlock(client, { blockNumber });
       return block.timestamp;
     })
+  );
+}
+
+const ethAddressPattern = /^0x[a-fA-F0-9]{40}$/;
+export function validateAddress(input: string) {
+  return ethAddressPattern.test(input);
+}
+
+//Workaround to check if the error is a user rejected request error, as it is known that viem's UserRejectedRequestError does not catch this...
+export function isUserRejectedRequestError(error: unknown) {
+  return (
+    error instanceof BaseError &&
+    (error as BaseError).shortMessage.includes("User rejected the request")
   );
 }

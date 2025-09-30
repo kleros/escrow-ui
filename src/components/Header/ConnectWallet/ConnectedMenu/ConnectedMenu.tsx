@@ -8,7 +8,7 @@ const Container = styled.div`
   position: relative;
 `;
 
-const CustomTag = styled(Tag)`
+const StyledTag = styled(Tag)`
   font-weight: bold;
   background-color: transparent;
   overflow: hidden;
@@ -36,7 +36,7 @@ const MenuContainer = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.default};
 `;
 
-const CustomButton = styled(Button)`
+const StyledButton = styled(Button)`
   border: 0;
   background-color: transparent;
 
@@ -68,14 +68,14 @@ export default function ConnectedMenu() {
 
   return (
     <Container ref={containerRef}>
-      <CustomTag
+      <StyledTag
         active
         text={`${chain?.name} | ${addressToShortString(address ?? "")}`}
         onPress={() => setIsMenuOpen(!isMenuOpen)}
       />
       {isMenuOpen && (
         <MenuContainer>
-          <CustomButton text="Disconnect" small onPress={() => disconnect()} />
+          <StyledButton text="Disconnect" small onPress={() => disconnect()} />
         </MenuContainer>
       )}
     </Container>
