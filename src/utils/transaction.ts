@@ -11,21 +11,23 @@ import {
 } from "config/contracts/events";
 import { formatUnits } from "viem";
 import { addressToShortString, getBlockExplorerLink } from "./common";
-import { DisputeRuling } from "model/Transaction";
+import { type FormattedTransactionStatus } from "model/Transaction";
 import type { Evidence } from "model/Evidence";
+import { DisputeRuling } from "model/Dispute";
 
 export const mapTransactionStatus = (
   backendStatus: string,
   amountInEscrow?: string
-): "Pending" | "Completed" | "Disputed" | "Unknown" => {
+): FormattedTransactionStatus => {
   switch (backendStatus) {
     case "Resolved":
       return "Completed";
     case "DisputeCreated":
       return "Disputed";
     case "WaitingSender":
+      return "Sender has to deposit arbitration fee";
     case "WaitingReceiver":
-      return "Pending";
+      return "Receiver has to deposit arbitration fee";
     case "NoDispute":
       //Check if the transaction has been paid (amount in escrow is 0)
       return amountInEscrow === "0" ? "Completed" : "Pending";

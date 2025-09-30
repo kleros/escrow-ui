@@ -1,6 +1,5 @@
 import type { EscrowToken } from "model/EscrowToken";
-import { NO_TIMEOUT_VALUE, type MetaEvidence } from "model/MetaEvidence";
-import { parseZonedDateTime } from "@internationalized/date";
+import { type MetaEvidence } from "model/MetaEvidence";
 import { ipfsPost } from "./ipfs";
 
 const defaultMetaEvidenceFields = {
@@ -24,6 +23,7 @@ interface UploadMetaEvidenceProps {
   arbitrableAddress: string;
   description: string;
   deadline: string;
+  timeout: number;
   receiverAddress: string;
   senderAddress: string;
   escrowType: string;
@@ -37,6 +37,7 @@ export async function uploadMetaEvidence({
   arbitrableAddress,
   description,
   deadline,
+  timeout,
   receiverAddress,
   senderAddress,
   escrowType,
@@ -53,15 +54,13 @@ export async function uploadMetaEvidence({
     amount: amount,
     description: description,
     extraData: {
-      "Due Date (Local Time)": parseZonedDateTime(deadline)
-        .toDate()
-        .toISOString(),
+      "Due Date (Local Time)": deadline,
     },
     invoice: false,
     receiver: receiverAddress,
     sender: senderAddress,
     subCategory: escrowType,
-    timeout: NO_TIMEOUT_VALUE, //No automatic payments yet
+    timeout: timeout,
     title: title,
     token: {
       address: token.address,

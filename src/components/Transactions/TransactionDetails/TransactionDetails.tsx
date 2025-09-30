@@ -5,14 +5,16 @@ import {
   CustomTimeline,
 } from "@kleros/ui-components-library";
 import { useTransactionDetails } from "hooks/useTransactionDetails";
-import { BaseSkeleton } from "components/Common/Skeleton/BaseSkeleton";
 import { useMemo } from "react";
+import { useAccount } from "wagmi";
 import { getIpfsUrl } from "utils/ipfs";
 import { DefaultDivider } from "components/Common/Dividers/DefaultDivider";
+import { BaseSkeleton } from "components/Common/Skeleton/BaseSkeleton";
 import Agreement from "./Agreement/Agreement";
 import TitleAndType from "./TitleAndType/TitleAndType";
 import Header from "./Header/Header";
 import Summary from "./Summary/Summary";
+import Actions from "./Actions/Actions";
 
 const StyledSkeleton = styled(BaseSkeleton)`
   height: 100%;
@@ -62,7 +64,9 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
     contractAddress,
   });
 
-  //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple
+  const { address } = useAccount();
+
+  //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple or exports the ICustomTimelineProps interface
   const timelineItems = useMemo<TimelineItems>(() => {
     if (!transaction) {
       return [
@@ -102,6 +106,19 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
     return [...items] as TimelineItems;
   }, [transaction]);
 
+  const shouldShowActions = useMemo(() => {
+    //Only show actions if the user is a party and the transaction is not completed
+    //Use lowercase for comparisons to account for situations where users copy addresses not checksummed
+    return (
+      transaction &&
+      (transaction.metaEvidence.sender.toLowerCase() ===
+        address?.toLowerCase() ||
+        transaction.metaEvidence.receiver.toLowerCase() ===
+          address?.toLowerCase()) &&
+      transaction.formattedStatus !== "Completed"
+    );
+  }, [transaction, address]);
+
   if (isFetching) {
     return <StyledSkeleton />;
   }
@@ -119,7 +136,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
   return (
     <StyledBox>
       <Header
-        status={transaction.status}
+        status={transaction.formattedStatus}
         blockExplorerLink={transaction.blockExplorerLink}
         createdAt={transaction.createdAt}
       />
@@ -138,6 +155,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
         sender={transaction.metaEvidence.sender}
         receiver={transaction.metaEvidence.receiver}
         deadline={transaction.metaEvidence.extraData["Due Date (Local Time)"]}
+        expiryTime={transaction.expiryTimestamp}
       />
 
       <DefaultDivider />
@@ -150,6 +168,20 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
       <DefaultDivider />
 
       <CustomTimeline items={timelineItems} />
+
+      {shouldShowActions && (
+        <>
+          <DefaultDivider />
+
+          <Actions
+            transaction={transaction}
+            isBuyer={
+              transaction.metaEvidence.sender.toLowerCase() ===
+              address?.toLowerCase()
+            }
+          />
+        </>
+      )}
     </StyledBox>
   );
 }

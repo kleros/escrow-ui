@@ -63,6 +63,18 @@ const AmountTag = styled(Tag)`
   pointer-events: none;
   text-transform: capitalize;
   font-weight: bold;
+  max-width: 50%;
+
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.xs}) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 interface Props {
@@ -78,8 +90,9 @@ export default function TransactionCard({ transaction }: Props) {
         <CardEdge>
           <TransactionStatusTag
             active
-            status={transaction.status}
-            text={transaction.status}
+            status={transaction.formattedStatus}
+            text={transaction.formattedStatus}
+            forceMaxWidth
           />
           <AmountTag
             active

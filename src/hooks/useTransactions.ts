@@ -132,7 +132,10 @@ function mapToTransactionMini(
     userPartyLabel: userParty,
     otherPartyAddress:
       userParty === "sender" ? metaEvidence.receiver : metaEvidence.sender,
-    status: mapTransactionStatus(TransactionStatus[status], txAmountInEscrow),
+    formattedStatus: mapTransactionStatus(
+      TransactionStatus[status],
+      txAmountInEscrow
+    ),
     lastInteraction: Number(lastInteraction),
   };
 }
@@ -220,7 +223,11 @@ export function useTransactions() {
                 blockTimestamps[index],
                 contractAddress,
                 metaEvidence,
-                metaEvidence?.aliases[address],
+                //For escrows between same address, metaevidence.aliases will priorize the receiver role, but the actions will be based on the sender role, so the below check is better for clarity
+                //Use lowercase for comparison to account for situations where users copy addresses not checksummed
+                metaEvidence.sender.toLowerCase() === address.toLowerCase()
+                  ? "sender"
+                  : "receiver",
                 tx.result[tx.result.length - 1] as number, //status
                 tx.result[2].toString(), //amount in escrow
                 tx.result[tx.result.length - 2] as number //last interaction

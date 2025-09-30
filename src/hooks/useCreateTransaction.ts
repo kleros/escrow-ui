@@ -9,13 +9,7 @@ import {
   useWriteMultipleArbitrableTransactionCreateTransaction,
 } from "config/contracts/generated";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
-import {
-  parseUnits,
-  zeroAddress,
-  erc20Abi,
-  BaseError,
-  decodeEventLog,
-} from "viem";
+import { parseUnits, zeroAddress, erc20Abi, decodeEventLog } from "viem";
 import {
   readContract,
   simulateContract,
@@ -23,6 +17,8 @@ import {
 } from "viem/actions";
 import { useAccount, useWriteContract, useClient } from "wagmi";
 import { getBalance } from "wagmi/actions";
+import { parseZonedDateTime } from "@internationalized/date";
+import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
 import { wagmiConfig } from "config/reown";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
@@ -32,6 +28,7 @@ import {
 } from "config/contracts/events";
 import { ipfsPost } from "utils/ipfs";
 import { uploadMetaEvidence } from "utils/metaEvidence";
+import { isUserRejectedRequestError } from "utils/common";
 
 export function useCreateTransaction() {
   const client = useClient();
@@ -72,6 +69,16 @@ export function useCreateTransaction() {
     : MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS[chain!.id]?.[court];
 
   const formattedAmount = parseUnits(amount.toString(), token.decimals);
+  const deadlineDate = parseZonedDateTime(deadline).toDate();
+  const formattedDeadline = deadlineDate.toISOString();
+
+  //The contract expects the timeout to be the difference between when the transaction is created and the actual date we want it to expire, not an actual expiry date.
+  //If we just sent the actual expiry date, executing transactions would be pratically impossible, because the contract checks if the now - lastInteraction >= timeout.
+  //To work around this, we calculate the difference between the deadline and the current time, and add the buffer period. This way, we can ensure that the timeout is always after the deadline.
+  const now = Math.floor(Date.now() / 1000);
+  const deadlineInSeconds = Math.floor(deadlineDate.getTime() / 1000);
+  const secondsUntilDeadline = deadlineInSeconds - now;
+  const timeoutWithBuffer = secondsUntilDeadline + BUFFER_PERIOD_IN_SECONDS;
 
   const handleIPFSUploads = async () => {
     //Upload agreement file to IPFS, if it exists
@@ -85,7 +92,8 @@ export function useCreateTransaction() {
       amount: amount.toString(),
       arbitrableAddress: contractAddress,
       description,
-      deadline,
+      deadline: formattedDeadline,
+      timeout: timeoutWithBuffer,
       receiverAddress,
       senderAddress,
       escrowType,
@@ -135,7 +143,7 @@ export function useCreateTransaction() {
       args: [
         formattedAmount,
         token.address,
-        0n,
+        BigInt(timeoutWithBuffer),
         receiverAddress as `0x${string}`,
         metaEvidenceURI,
       ],
@@ -154,7 +162,11 @@ export function useCreateTransaction() {
       abi: MULTIPLE_ARBITRABLE_TRANSACTION_ABI,
       address: contractAddress as `0x${string}`,
       functionName: "createTransaction",
-      args: [0n, receiverAddress as `0x${string}`, metaEvidenceURI],
+      args: [
+        BigInt(timeoutWithBuffer),
+        receiverAddress as `0x${string}`,
+        metaEvidenceURI,
+      ],
       value: formattedAmount,
     } as const;
 
@@ -213,6 +225,13 @@ export function useCreateTransaction() {
       return;
     }
 
+    //Check if the deadline is still in the future, for situations where the user stays in the form long enough for the selected deadline to now be in the past
+    if (deadlineDate.getTime() < new Date().getTime()) {
+      setError("Deadline is in the past");
+      setIsCreating(false);
+      return;
+    }
+
     try {
       const metaEvidenceURI = await handleIPFSUploads();
 
@@ -235,13 +254,8 @@ export function useCreateTransaction() {
       //Log the error to the console for debugging purposes
       console.error(error);
 
-      //Workaround to check if the error is a user rejected request error, as it is known that viem's UserRejectedRequestError does not catch this...
-      const isUserRejectedRequestError =
-        error instanceof BaseError &&
-        (error as BaseError).shortMessage.includes("User rejected the request");
-
       //Do not show error if user rejected the request
-      if (!isUserRejectedRequestError) {
+      if (!isUserRejectedRequestError(error)) {
         setError(
           "Please verify your inputs and try again. If the error persists, please reach out via Discord or Telegram."
         );

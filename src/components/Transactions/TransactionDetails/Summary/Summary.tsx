@@ -4,14 +4,10 @@ import { addressToShortString } from "utils/common";
 import { formatDeadlineDate } from "utils/transaction";
 
 const Container = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
-    justify-content: center;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  justify-items: center;
 `;
 
 interface Props {
@@ -21,6 +17,7 @@ interface Props {
   sender: string;
   receiver: string;
   deadline?: string;
+  expiryTime: number;
 }
 
 export default function Summary({
@@ -30,6 +27,7 @@ export default function Summary({
   sender,
   receiver,
   deadline,
+  expiryTime,
 }: Props) {
   return (
     <Container>
@@ -57,13 +55,20 @@ export default function Summary({
         Icon={() => <></>}
       />
 
+      {/* Deadline is optional to maintain backwards compatibility with old frontend. */}
       {deadline && (
         <StyledDisplaySmall
-          label="Deadline (UTC)"
+          label="Delivery deadline (UTC)"
           text={formatDeadlineDate(new Date(deadline))}
           Icon={() => <></>}
         />
       )}
+
+      <StyledDisplaySmall
+        label="Escrow expiry (UTC)"
+        text={formatDeadlineDate(new Date(expiryTime * 1000))}
+        Icon={() => <></>}
+      />
     </Container>
   );
 }

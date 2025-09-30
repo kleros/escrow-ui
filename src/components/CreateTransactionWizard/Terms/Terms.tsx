@@ -3,20 +3,22 @@ import {
   Datepicker,
   FileUploader,
   TextArea,
+  Tooltip,
 } from "@kleros/ui-components-library";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
 import {
   ButtonContainer,
   mobileResponsive,
   StyledForm,
-} from "../StyledForm/StyledForm";
+} from "../../Common/Form/StyledForm";
 import styled from "styled-components";
 import {
   getLocalTimeZone,
   now,
   parseZonedDateTime,
 } from "@internationalized/date";
-import { formatFileName } from "utils/common";
+import { IconButton } from "components/Common/Buttons/IconButton";
+import InfoCircleOutline from "assets/info-circle-outline.svg?react";
 
 const StyledTextArea = styled(TextArea)`
   width: 500px;
@@ -38,13 +40,18 @@ const StyledFileUploader = styled(FileUploader)`
   ${mobileResponsive}
 `;
 
-const CustomFormElementContainer = styled.div`
+const CustomFormFieldContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: 500px;
 
   ${mobileResponsive}
+`;
+
+const DeadlineInfoContainer = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const StyledLabel = styled.label`
@@ -81,14 +88,6 @@ export default function Terms({ next, back }: Props) {
     next();
   };
 
-  const handleFileUpload = (file: File) => {
-    if (file.type !== "application/pdf") {
-      return;
-    }
-
-    setAgreementFile(file);
-  };
-
   return (
     <StyledForm onSubmit={handleSubmit}>
       <StyledTextArea
@@ -104,8 +103,17 @@ export default function Terms({ next, back }: Props) {
         showFieldError
       />
 
-      <CustomFormElementContainer>
-        <StyledLabel htmlFor="deadline">Deadline (Local time)</StyledLabel>
+      <CustomFormFieldContainer>
+        <DeadlineInfoContainer>
+          <StyledLabel htmlFor="deadline">
+            Delivery deadline (Local time)
+          </StyledLabel>
+
+          <Tooltip text="This is the deadline for the delivery of the goods or services. There is a buffer period after this date (approximately 1 week, depending on when the transaction is processed). The exact expiry date will be visible in the transaction details page.">
+            <IconButton small icon={<InfoCircleOutline />} text="" />
+          </Tooltip>
+        </DeadlineInfoContainer>
+
         <StyledDatepicker
           name="deadline"
           minValue={now(getLocalTimeZone())}
@@ -114,22 +122,24 @@ export default function Terms({ next, back }: Props) {
           time
           isRequired
         />
-      </CustomFormElementContainer>
+      </CustomFormFieldContainer>
 
-      <CustomFormElementContainer>
+      <CustomFormFieldContainer>
         <StyledLabel htmlFor="agreement">
           Upload an agreement PDF (optional)
         </StyledLabel>
         <StyledFileUploader
-          callback={handleFileUpload}
-          msg={
-            agreementFile
-              ? `Current file: ${formatFileName(agreementFile.name)}`
-              : "Non PDF files will be ignored"
-          }
+          callback={setAgreementFile}
+          selectedFile={agreementFile}
           acceptedFileTypes={["application/pdf"]}
+          validationFunction={(file) => {
+            if (!file || file.type !== "application/pdf") {
+              return false;
+            }
+            return true;
+          }}
         />
-      </CustomFormElementContainer>
+      </CustomFormFieldContainer>
 
       <ButtonContainer>
         <Button small text="Back" onPress={back} />

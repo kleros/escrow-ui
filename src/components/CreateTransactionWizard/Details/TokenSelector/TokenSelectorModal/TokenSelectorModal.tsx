@@ -1,23 +1,9 @@
-import { Modal, Searchbar } from "@kleros/ui-components-library";
-import { mobileResponsive } from "components/CreateTransactionWizard/StyledForm/StyledForm";
+import { Searchbar } from "@kleros/ui-components-library";
 import type { EscrowToken } from "model/EscrowToken";
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import AddCustomToken from "./AddCustomToken/AddCustomToken";
-
-const StyledModal = styled(Modal)`
-  width: 500px;
-  height: 100%;
-  max-height: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: ${({ theme }) => theme.radius.boxDefault};
-  overflow-y: auto;
-
-  ${mobileResponsive}
-`;
+import { StyledModal } from "components/Common/Modal/StyledModal";
 
 const StyledSearchbar = styled(Searchbar)`
   width: 100%;

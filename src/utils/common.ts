@@ -1,7 +1,7 @@
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS } from "config/contracts/addresses";
-import type { Client } from "viem";
+import { BaseError, type Client } from "viem";
 import { getBlock } from "viem/actions";
 
 export function addressToShortString(address: string) {
@@ -48,10 +48,10 @@ export function validateAddress(input: string) {
   return ethAddressPattern.test(input);
 }
 
-export function formatFileName(fileName: string) {
-  if (fileName.length <= 15) {
-    return fileName;
-  }
-
-  return `${fileName.slice(0, 8)}...${fileName.slice(-6)}`;
+//Workaround to check if the error is a user rejected request error, as it is known that viem's UserRejectedRequestError does not catch this...
+export function isUserRejectedRequestError(error: unknown) {
+  return (
+    error instanceof BaseError &&
+    (error as BaseError).shortMessage.includes("User rejected the request")
+  );
 }
