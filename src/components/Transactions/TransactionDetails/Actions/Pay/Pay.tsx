@@ -26,6 +26,7 @@ interface Props {
   escrowAmount: number;
   ticker: string;
   decimals: number;
+  onlyFullPayment: boolean;
 }
 
 export default function Pay({
@@ -34,6 +35,7 @@ export default function Pay({
   escrowAmount,
   ticker,
   decimals,
+  onlyFullPayment,
 }: Props) {
   const queryClient = useQueryClient();
   const client = useClient();
@@ -47,21 +49,19 @@ export default function Pay({
     return {
       address: contractAddress as `0x${string}`,
       args: [transactionId, parseUnits(amount.toString(), decimals)],
+      account: address, //By default this is the account used, but set it so if the user switches accounts after the component is rendered, the simulation will use the correct account
+      query: { enabled: false }, //Only simulate when we want
     } as const;
-  }, [transactionId, amount, decimals, contractAddress]);
+  }, [contractAddress, transactionId, amount, decimals, address]);
 
   const { refetch: refetchNativeSimulateData } =
     useSimulateMultipleArbitrableTransactionPay({
       ...transactionConfig,
-      account: address, //By default this is the account used, but set it so if the user switches accounts after the component is rendered, the simulation will use the correct account
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { refetch: refetchTokenSimulateData } =
     useSimulateMultipleArbitrableTokenTransactionPay({
       ...transactionConfig,
-      account: address,
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { writeContractAsync: payNativeTransaction } =
@@ -143,10 +143,9 @@ export default function Pay({
         </StyledP>
 
         <p>
-          If you are happy with the service or good provided, you can pay the
-          total amount and complete the escrow. <br />
-          Otherwise, you can make a partial payment. The amount that remains can
-          still be disputed.
+          {onlyFullPayment
+            ? "Pay the full amount and complete the escrow."
+            : "If you are happy with the service or good provided, you can pay the total amount and complete the escrow. Otherwise, you can make a partial payment. The amount that remains can still be disputed."}
         </p>
 
         <StyledForm onSubmit={handlePay}>
@@ -163,6 +162,7 @@ export default function Pay({
                 : "Amount must be greater than 0, but not greater than the escrow amount."
             }
             minValue={0}
+            isDisabled={onlyFullPayment}
             showFieldError
             formatOptions={{
               //Prevent automatic rounding of very small amounts
@@ -181,7 +181,11 @@ export default function Pay({
         </StyledForm>
       </StyledModal>
 
-      <Button small text="Make a payment" onPress={() => setIsOpen(true)} />
+      <Button
+        small
+        text={onlyFullPayment ? "Pay" : "Make a payment"}
+        onPress={() => setIsOpen(true)}
+      />
     </>
   );
 }

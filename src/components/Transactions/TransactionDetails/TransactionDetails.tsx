@@ -66,7 +66,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
 
   const { address } = useAccount();
 
-  //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple
+  //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple or exports the ICustomTimelineProps interface
   const timelineItems = useMemo<TimelineItems>(() => {
     if (!transaction) {
       return [
@@ -155,7 +155,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
         sender={transaction.metaEvidence.sender}
         receiver={transaction.metaEvidence.receiver}
         deadline={transaction.metaEvidence.extraData["Due Date (Local Time)"]}
-        expiryTime={transaction.metaEvidence.timeout}
+        expiryTime={transaction.expiryTimestamp}
       />
 
       <DefaultDivider />

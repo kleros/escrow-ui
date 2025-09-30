@@ -6,7 +6,7 @@ import {
   ButtonContainer,
   mobileResponsive,
   StyledForm,
-} from "../StyledForm/StyledForm";
+} from "../../Common/Form/StyledForm";
 import TokenSelector from "./TokenSelector/TokenSelector";
 
 const StyledTextField = styled(TextField)`

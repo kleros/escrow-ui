@@ -6,7 +6,7 @@ import { ThemeContext } from "./ThemeContext";
 
 export function CustomThemeProvider({ children }: { children: ReactNode }) {
   const [themeMode, setThemeMode] = useLocalStorage<"light" | "dark">(
-    "theme",
+    "@kleros/escrow-v1/theme",
     "dark"
   );
   const theme = useMemo(() => ({ ...baseTheme, mode: themeMode }), [themeMode]);
