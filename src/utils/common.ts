@@ -48,14 +48,6 @@ export function validateAddress(input: string) {
   return ethAddressPattern.test(input);
 }
 
-export function formatFileName(fileName: string) {
-  if (fileName.length <= 15) {
-    return fileName;
-  }
-
-  return `${fileName.slice(0, 8)}...${fileName.slice(-6)}`;
-}
-
 //Workaround to check if the error is a user rejected request error, as it is known that viem's UserRejectedRequestError does not catch this...
 export function isUserRejectedRequestError(error: unknown) {
   return (

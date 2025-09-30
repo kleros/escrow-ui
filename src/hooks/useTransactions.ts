@@ -224,6 +224,7 @@ export function useTransactions() {
                 contractAddress,
                 metaEvidence,
                 //For escrows between same address, metaevidence.aliases will priorize the receiver role, but the actions will be based on the sender role, so the below check is better for clarity
+                //Use lowercase for comparison to account for situations where users copy addresses not checksummed
                 metaEvidence.sender.toLowerCase() === address.toLowerCase()
                   ? "sender"
                   : "receiver",

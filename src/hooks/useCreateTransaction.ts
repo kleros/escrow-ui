@@ -18,7 +18,7 @@ import {
 import { useAccount, useWriteContract, useClient } from "wagmi";
 import { getBalance } from "wagmi/actions";
 import { parseZonedDateTime } from "@internationalized/date";
-import { ONE_WEEK_BUFFER_IN_SECONDS } from "model/Transaction";
+import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
 import { wagmiConfig } from "config/reown";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
@@ -69,10 +69,16 @@ export function useCreateTransaction() {
     : MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS[chain!.id]?.[court];
 
   const formattedAmount = parseUnits(amount.toString(), token.decimals);
-  const formattedDeadline = parseZonedDateTime(deadline).toDate().toISOString();
-  const timeoutWithBuffer =
-    Math.floor(new Date(formattedDeadline).getTime() / 1000) +
-    ONE_WEEK_BUFFER_IN_SECONDS;
+  const deadlineDate = parseZonedDateTime(deadline).toDate();
+  const formattedDeadline = deadlineDate.toISOString();
+
+  //The contract expects the timeout to be the difference between when the transaction is created and the actual date we want it to expire, not an actual expiry date.
+  //If we just sent the actual expiry date, executing transactions would be pratically impossible, because the contract checks if the now - lastInteraction >= timeout.
+  //To work around this, we calculate the difference between the deadline and the current time, and add the buffer period. This way, we can ensure that the timeout is always after the deadline.
+  const now = Math.floor(Date.now() / 1000);
+  const deadlineInSeconds = Math.floor(deadlineDate.getTime() / 1000);
+  const secondsUntilDeadline = deadlineInSeconds - now;
+  const timeoutWithBuffer = secondsUntilDeadline + BUFFER_PERIOD_IN_SECONDS;
 
   const handleIPFSUploads = async () => {
     //Upload agreement file to IPFS, if it exists
@@ -215,6 +221,13 @@ export function useCreateTransaction() {
 
     if (userBalance.value < formattedAmount) {
       setError("Insufficient balance");
+      setIsCreating(false);
+      return;
+    }
+
+    //Check if the deadline is still in the future, for situations where the user stays in the form long enough for the selected deadline to now be in the past
+    if (deadlineDate.getTime() < new Date().getTime()) {
+      setError("Deadline is in the past");
       setIsCreating(false);
       return;
     }

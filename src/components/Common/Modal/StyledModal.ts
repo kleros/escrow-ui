@@ -1,6 +1,6 @@
 import { Modal } from "@kleros/ui-components-library";
-import { mobileResponsive } from "components/CreateTransactionWizard/StyledForm/StyledForm";
 import styled from "styled-components";
+import { mobileResponsive } from "../Form/StyledForm";
 
 export const StyledModal = styled(Modal)<{ width?: string }>`
   width: ${({ width }) => width ?? "500px"};

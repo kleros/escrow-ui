@@ -55,7 +55,7 @@ const CardContainer = styled.div`
   text-align: center;
 `;
 
-const StyledCard = styled(Card)<{ active: boolean }>`
+const StyledCard = styled(Card)<{ selected: boolean }>`
   display: flex;
   flex-direction: column;
   height: 150px;
@@ -64,8 +64,8 @@ const StyledCard = styled(Card)<{ active: boolean }>`
   padding: 4px;
   justify-content: space-around;
   align-items: center;
-  border-color: ${({ theme, active }) =>
-    active ? theme.colors.tint : "transparent"};
+  border-color: ${({ theme, selected }) =>
+    selected ? theme.colors.tint : "transparent"};
 `;
 
 const StyledDescription = styled.p`
@@ -107,7 +107,7 @@ export default function Template({ next }: Props) {
         {ESCROW_TEMPLATES.map((template) => (
           <StyledCard
             key={template.title}
-            active={selectedTemplate.id === template.id}
+            selected={selectedTemplate.id === template.id}
             onClick={() => handleSelectTemplate(template)}
             round
             hover

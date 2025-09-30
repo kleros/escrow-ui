@@ -1341,9 +1341,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kleros/ui-components-library@npm:^3.4.5":
-  version: 3.4.5
-  resolution: "@kleros/ui-components-library@npm:3.4.5"
+"@kleros/ui-components-library@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "@kleros/ui-components-library@npm:3.6.0"
   dependencies:
     "@internationalized/date": "npm:^3.7.0"
     bignumber.js: "npm:^9.1.2"
@@ -1364,7 +1364,7 @@ __metadata:
     react-dom: ^18.0.0
     react-is: ^18.0.0
     tailwindcss: ^4.0.11
-  checksum: 10c0/ef3d0851dabe2454444cfe5ea43bb74db65a0257321165e41c3b26128bf99ef43d44baf67735246237b9345aee280431d3d88f5088d5cf0103edce47e03fe9ff
+  checksum: 10c0/d76e481f3e72f76d40037a784ac65f97c411ce287fb7720aebb084f81032681b7f19cad0bd5269a719db148069dd18f17280083bd44938225e7e1dd3d51547d4
   languageName: node
   linkType: hard
 
@@ -6325,7 +6325,7 @@ __metadata:
   resolution: "escrow-v1-ui@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.25.0"
-    "@kleros/ui-components-library": "npm:^3.4.5"
+    "@kleros/ui-components-library": "npm:^3.6.0"
     "@reown/appkit": "npm:^1.7.6"
     "@reown/appkit-adapter-wagmi": "npm:^1.7.6"
     "@tanstack/react-query": "npm:^5.76.1"
@@ -6339,6 +6339,7 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.19"
     globals: "npm:^16.0.0"
     react: "npm:^18.2.55"
+    react-countdown: "npm:^2.3.6"
     react-dom: "npm:^18.2.55"
     react-router: "npm:^7.6.0"
     styled-components: "npm:^6.1.18"
@@ -8437,7 +8438,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.1":
+"prop-types@npm:^15.6.1, prop-types@npm:^15.7.2":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -8615,6 +8616,18 @@ __metadata:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
     react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
   checksum: 10c0/18601ee980a278b482114a65f6bd049d26c6734fec6fb6cb895a30402541bf08c19c9e33f5c839aa93d40183173cd4d721d2b7e2dd5a79010ea95eff18f20aa6
+  languageName: node
+  linkType: hard
+
+"react-countdown@npm:^2.3.6":
+  version: 2.3.6
+  resolution: "react-countdown@npm:2.3.6"
+  dependencies:
+    prop-types: "npm:^15.7.2"
+  peerDependencies:
+    react: ">= 15"
+    react-dom: ">= 15"
+  checksum: 10c0/defb75cb9802c499eb0d5f6c8c6e4269de1005f9c05d5162bccf45063782fd2f5f87acd95d11f70e623fa75085a546b9d0fb0df27c5287ed6a86334342d903cf
   languageName: node
   linkType: hard
 

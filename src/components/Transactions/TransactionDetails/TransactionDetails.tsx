@@ -66,7 +66,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
 
   const { address } = useAccount();
 
-  //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple
+  //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple or exports the ICustomTimelineProps interface
   const timelineItems = useMemo<TimelineItems>(() => {
     if (!transaction) {
       return [
@@ -108,10 +108,13 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
 
   const shouldShowActions = useMemo(() => {
     //Only show actions if the user is a party and the transaction is not completed
+    //Use lowercase for comparisons to account for situations where users copy addresses not checksummed
     return (
       transaction &&
-      (transaction.metaEvidence.sender === address ||
-        transaction.metaEvidence.receiver === address) &&
+      (transaction.metaEvidence.sender.toLowerCase() ===
+        address?.toLowerCase() ||
+        transaction.metaEvidence.receiver.toLowerCase() ===
+          address?.toLowerCase()) &&
       transaction.formattedStatus !== "Completed"
     );
   }, [transaction, address]);
@@ -152,7 +155,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
         sender={transaction.metaEvidence.sender}
         receiver={transaction.metaEvidence.receiver}
         deadline={transaction.metaEvidence.extraData["Due Date (Local Time)"]}
-        expiryTime={transaction.metaEvidence.timeout}
+        expiryTime={transaction.expiryTimestamp}
       />
 
       <DefaultDivider />
@@ -172,7 +175,10 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
 
           <Actions
             transaction={transaction}
-            isBuyer={transaction.metaEvidence.sender === address}
+            isBuyer={
+              transaction.metaEvidence.sender.toLowerCase() ===
+              address?.toLowerCase()
+            }
           />
         </>
       )}

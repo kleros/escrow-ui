@@ -1,4 +1,4 @@
-import { mobileResponsive } from "components/CreateTransactionWizard/StyledForm/StyledForm";
+import { mobileResponsive } from "components/Common/Form/StyledForm";
 import type { EscrowToken } from "model/EscrowToken";
 import styled from "styled-components";
 
