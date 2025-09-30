@@ -6339,6 +6339,7 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.19"
     globals: "npm:^16.0.0"
     react: "npm:^18.2.55"
+    react-countdown: "npm:^2.3.6"
     react-dom: "npm:^18.2.55"
     react-router: "npm:^7.6.0"
     styled-components: "npm:^6.1.18"
@@ -8437,7 +8438,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.1":
+"prop-types@npm:^15.6.1, prop-types@npm:^15.7.2":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -8615,6 +8616,18 @@ __metadata:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
     react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
   checksum: 10c0/18601ee980a278b482114a65f6bd049d26c6734fec6fb6cb895a30402541bf08c19c9e33f5c839aa93d40183173cd4d721d2b7e2dd5a79010ea95eff18f20aa6
+  languageName: node
+  linkType: hard
+
+"react-countdown@npm:^2.3.6":
+  version: 2.3.6
+  resolution: "react-countdown@npm:2.3.6"
+  dependencies:
+    prop-types: "npm:^15.7.2"
+  peerDependencies:
+    react: ">= 15"
+    react-dom: ">= 15"
+  checksum: 10c0/defb75cb9802c499eb0d5f6c8c6e4269de1005f9c05d5162bccf45063782fd2f5f87acd95d11f70e623fa75085a546b9d0fb0df27c5287ed6a86334342d903cf
   languageName: node
   linkType: hard
 
