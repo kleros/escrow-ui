@@ -5,6 +5,10 @@ import Reimburse from "./Reimburse/Reimburse";
 import Execute from "./Execute/Execute";
 import { useState } from "react";
 import ErrorAlert from "./Common/ErrorAlert/ErrorAlert";
+import RaiseDispute from "./RaiseDispute/RaiseDispute";
+import Withdraw from "./Withdraw/Withdraw";
+import OngoingDisputeInfo from "./OngoingDisputeInfo/OngoingDisputeInfo";
+import { DisputeStatus } from "model/Dispute";
 
 const Container = styled.div`
   display: flex;
@@ -15,6 +19,12 @@ const Container = styled.div`
 const ActionsContainer = styled.div`
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.xs}) {
+    gap: 1rem;
+  }
 `;
 
 interface Props {
@@ -23,7 +33,8 @@ interface Props {
 }
 
 export default function Actions({ transaction, isBuyer }: Props) {
-  const [isExecuteError, setIsExecuteError] = useState<boolean>(false);
+  //For actions that do not have their own modal to show an error
+  const [isActionError, setIsActionError] = useState<boolean>(false);
 
   const currentTime = Date.now() / 1000;
   const isInBufferPeriod =
@@ -59,9 +70,34 @@ export default function Actions({ transaction, isBuyer }: Props) {
     transaction.status === TransactionStatus.NoDispute &&
     hasTimedOut;
 
+  //Show raise dispute button if there is no dispute already and the transaction has not timed out
+  const showRaiseDisputeButton =
+    transaction.status === TransactionStatus.NoDispute && !hasTimedOut;
+
+  //Show deposit arbitration fee button (RaiseDispute component) to the user only if he is the party that needs to deposit the arbitration fee
+  const showDepositArbitrationFeeButton =
+    (transaction.status === TransactionStatus.WaitingSender && isBuyer) ||
+    (transaction.status === TransactionStatus.WaitingReceiver && !isBuyer);
+
+  const depositFeeDeadline =
+    transaction.lastInteraction + transaction.arbitrationInfo.feeTimeout;
+
+  //Show withdraw button if the user is the party that is waiting for the other to deposit the arbitration fee
+  const showWithdrawButton =
+    (transaction.status === TransactionStatus.WaitingSender && !isBuyer) ||
+    (transaction.status === TransactionStatus.WaitingReceiver && isBuyer);
+
+  const ongoingDispute =
+    transaction.status === TransactionStatus.DisputeCreated &&
+    transaction.disputeInfo.disputeStatus !== DisputeStatus.Solved;
+
+  const waitingRulingExecution =
+    transaction.status !== TransactionStatus.Resolved &&
+    transaction.disputeInfo.disputeStatus === DisputeStatus.Solved;
+
   return (
     <Container>
-      {isExecuteError && <ErrorAlert />}
+      {isActionError && <ErrorAlert />}
 
       <ActionsContainer>
         {showPayButton && (
@@ -90,7 +126,43 @@ export default function Actions({ transaction, isBuyer }: Props) {
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
             isNative={transaction.metaEvidence.token?.ticker === "ETH"}
-            setIsExecuteError={setIsExecuteError}
+            setIsExecuteError={setIsActionError}
+          />
+        )}
+
+        {(showRaiseDisputeButton || showDepositArbitrationFeeButton) && (
+          <RaiseDispute
+            transactionId={transaction.id}
+            contractAddress={transaction.arbitrableAddress}
+            arbitrationCost={transaction.arbitrationInfo.arbitrationCost}
+            isNative={transaction.metaEvidence.token?.ticker === "ETH"}
+            isBuyer={isBuyer}
+            hasToDepositFee={showDepositArbitrationFeeButton}
+            depositFeeDeadline={depositFeeDeadline}
+          />
+        )}
+
+        {showWithdrawButton && (
+          <Withdraw
+            transactionId={transaction.id}
+            contractAddress={transaction.arbitrableAddress}
+            isNative={transaction.metaEvidence.token?.ticker === "ETH"}
+            isBuyer={isBuyer}
+            depositFeeDeadline={depositFeeDeadline}
+            setIsWithdrawError={setIsActionError}
+          />
+        )}
+
+        {(ongoingDispute || waitingRulingExecution) && (
+          <OngoingDisputeInfo
+            transactionId={transaction.id}
+            contractAddress={transaction.arbitrableAddress}
+            isNative={transaction.metaEvidence.token?.ticker === "ETH"}
+            disputeId={transaction.disputeId}
+            disputeInfo={transaction.disputeInfo}
+            isBuyer={isBuyer}
+            isAwaitingRulingExecution={waitingRulingExecution}
+            setIsAppealError={setIsActionError}
           />
         )}
       </ActionsContainer>

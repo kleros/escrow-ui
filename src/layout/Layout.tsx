@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import Header from "components/Header/Header";
 import Footer from "components/Footer/Footer";
+import SmartContractWalletWarning from "components/Warnings/SmartContractWalletWarning";
 import { Outlet } from "react-router";
 
 const Container = styled.div`
@@ -13,6 +14,7 @@ const Container = styled.div`
 export default function Layout() {
   return (
     <Container>
+      <SmartContractWalletWarning />
       <Header />
       <Outlet />
       <Footer />
