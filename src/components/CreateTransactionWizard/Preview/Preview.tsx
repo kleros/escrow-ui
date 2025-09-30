@@ -11,7 +11,7 @@ import Agreement from "components/Transactions/TransactionDetails/Agreement/Agre
 import TitleAndType from "components/Transactions/TransactionDetails/TitleAndType/TitleAndType";
 import { DefaultDivider } from "components/Common/Dividers/DefaultDivider";
 import { StyledDisplaySmall } from "components/Common/Form/StyledDisplaySmall";
-import { ONE_WEEK_BUFFER_IN_SECONDS } from "model/Transaction";
+import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
 
 interface Props {
   back: () => void;
@@ -123,7 +123,7 @@ export default function Preview({ back }: Props) {
           label="Estimated escrow expiry (UTC)"
           text={formatDeadlineDate(
             parseZonedDateTime(deadline)
-              .add({ seconds: ONE_WEEK_BUFFER_IN_SECONDS })
+              .add({ seconds: BUFFER_PERIOD_IN_SECONDS })
               .toDate()
           )}
           Icon={() => <></>}

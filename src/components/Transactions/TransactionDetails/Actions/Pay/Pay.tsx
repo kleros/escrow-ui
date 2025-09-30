@@ -49,21 +49,19 @@ export default function Pay({
     return {
       address: contractAddress as `0x${string}`,
       args: [transactionId, parseUnits(amount.toString(), decimals)],
+      account: address, //By default this is the account used, but set it so if the user switches accounts after the component is rendered, the simulation will use the correct account
+      query: { enabled: false }, //Only simulate when we want
     } as const;
-  }, [transactionId, amount, decimals, contractAddress]);
+  }, [contractAddress, transactionId, amount, decimals, address]);
 
   const { refetch: refetchNativeSimulateData } =
     useSimulateMultipleArbitrableTransactionPay({
       ...transactionConfig,
-      account: address, //By default this is the account used, but set it so if the user switches accounts after the component is rendered, the simulation will use the correct account
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { refetch: refetchTokenSimulateData } =
     useSimulateMultipleArbitrableTokenTransactionPay({
       ...transactionConfig,
-      account: address,
-      query: { enabled: false }, //Only simulate when we want
     });
 
   const { writeContractAsync: payNativeTransaction } =

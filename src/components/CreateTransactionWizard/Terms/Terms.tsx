@@ -17,7 +17,6 @@ import {
   now,
   parseZonedDateTime,
 } from "@internationalized/date";
-import { formatFileName } from "utils/common";
 import { IconButton } from "components/Common/Buttons/IconButton";
 import InfoCircleOutline from "assets/info-circle-outline.svg?react";
 
@@ -89,14 +88,6 @@ export default function Terms({ next, back }: Props) {
     next();
   };
 
-  const handleFileUpload = (file: File) => {
-    if (file.type !== "application/pdf") {
-      return;
-    }
-
-    setAgreementFile(file);
-  };
-
   return (
     <StyledForm onSubmit={handleSubmit}>
       <StyledTextArea
@@ -138,13 +129,15 @@ export default function Terms({ next, back }: Props) {
           Upload an agreement PDF (optional)
         </StyledLabel>
         <StyledFileUploader
-          callback={handleFileUpload}
-          msg={
-            agreementFile
-              ? `Current file: ${formatFileName(agreementFile.name)}`
-              : "Non PDF files will be ignored"
-          }
+          callback={setAgreementFile}
+          selectedFile={agreementFile}
           acceptedFileTypes={["application/pdf"]}
+          validationFunction={(file) => {
+            if (!file || file.type !== "application/pdf") {
+              return false;
+            }
+            return true;
+          }}
         />
       </CustomFormFieldContainer>
 

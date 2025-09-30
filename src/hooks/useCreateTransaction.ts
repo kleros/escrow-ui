@@ -18,7 +18,7 @@ import {
 import { useAccount, useWriteContract, useClient } from "wagmi";
 import { getBalance } from "wagmi/actions";
 import { parseZonedDateTime } from "@internationalized/date";
-import { ONE_WEEK_BUFFER_IN_SECONDS } from "model/Transaction";
+import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
 import { wagmiConfig } from "config/reown";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
@@ -78,7 +78,7 @@ export function useCreateTransaction() {
   const now = Math.floor(Date.now() / 1000);
   const deadlineInSeconds = Math.floor(deadlineDate.getTime() / 1000);
   const secondsUntilDeadline = deadlineInSeconds - now;
-  const timeoutWithBuffer = secondsUntilDeadline + ONE_WEEK_BUFFER_IN_SECONDS;
+  const timeoutWithBuffer = secondsUntilDeadline + BUFFER_PERIOD_IN_SECONDS;
 
   const handleIPFSUploads = async () => {
     //Upload agreement file to IPFS, if it exists
@@ -221,6 +221,13 @@ export function useCreateTransaction() {
 
     if (userBalance.value < formattedAmount) {
       setError("Insufficient balance");
+      setIsCreating(false);
+      return;
+    }
+
+    //Check if the deadline is still in the future, for situations where the user stays in the form long enough for the selected deadline to now be in the past
+    if (deadlineDate.getTime() < new Date().getTime()) {
+      setError("Deadline is in the past");
       setIsCreating(false);
       return;
     }

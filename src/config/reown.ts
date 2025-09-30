@@ -10,13 +10,12 @@ const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
 
 const networks = Object.values(SUPPORTED_CHAINS) as [
   AppKitNetwork,
-  ...AppKitNetwork[]
+  ...AppKitNetwork[],
 ];
 
 export const wagmiAdapter = new WagmiAdapter({
   networks: networks,
   projectId,
-  ssr: true,
   transports: TRANSPORTS,
 });
 
