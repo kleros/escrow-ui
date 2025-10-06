@@ -154,7 +154,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
         ticker={transaction.metaEvidence.token?.ticker ?? "ETH"}
         sender={transaction.metaEvidence.sender}
         receiver={transaction.metaEvidence.receiver}
-        deadline={transaction.metaEvidence.extraData["Due Date (Local Time)"]}
+        deadline={transaction.metaEvidence.extraData?.["Due Date (Local Time)"]}
         expiryTime={transaction.expiryTimestamp}
       />
 

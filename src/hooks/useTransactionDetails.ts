@@ -275,7 +275,7 @@ function mapToTransaction(
 
   //The due date is not required in the old frontend. As a last resort, we fallback to the last interaction.
   //Not ideal, but it's the best we can do to maintain backwards compatibility.
-  const deadlineTimestamp = metaEvidence.extraData["Due Date (Local Time)"]
+  const deadlineTimestamp = metaEvidence.extraData?.["Due Date (Local Time)"]
     ? new Date(metaEvidence.extraData["Due Date (Local Time)"]).getTime() / 1000
     : lastInteraction;
 
