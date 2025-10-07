@@ -143,13 +143,7 @@ export default function Preview({ back }: Props) {
       />
 
       <StyledButtonContainer>
-        <Button
-          small
-          text="Back"
-          onPress={back}
-          isLoading={isCreating}
-          isDisabled={isCreating}
-        />
+        <Button small text="Back" onPress={back} isDisabled={isCreating} />
         <Button
           small
           text="Create escrow"
