@@ -4,7 +4,6 @@ import { useNewTransactionContext } from "context/newTransaction/useNewTransacti
 import { useCreateTransaction } from "hooks/useCreateTransaction";
 import { AlertMessage, Button, Card } from "@kleros/ui-components-library";
 import { ButtonContainer } from "../../Common/Form/StyledForm";
-import { addressToShortString } from "utils/common";
 import { formatDeadlineDate } from "utils/transaction";
 import { parseZonedDateTime } from "@internationalized/date";
 import Agreement from "components/Transactions/TransactionDetails/Agreement/Agreement";
@@ -12,6 +11,7 @@ import TitleAndType from "components/Transactions/TransactionDetails/TitleAndTyp
 import { DefaultDivider } from "components/Common/Dividers/DefaultDivider";
 import { StyledDisplaySmall } from "components/Common/Form/StyledDisplaySmall";
 import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
+import AddressLinkAndCopy from "components/Common/Display/AddressLinkAndCopy";
 
 interface Props {
   back: () => void;
@@ -25,9 +25,13 @@ const StyledCard = styled(Card)`
   height: fit-content;
   max-height: 100%;
   overflow-y: auto;
-  gap: 8px;
+  gap: 16px;
   padding: 16px;
   border-radius: ${({ theme }) => theme.radius.boxDefault};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    max-width: unset;
+  }
 `;
 
 const StyledAlertMessage = styled(AlertMessage)`
@@ -103,14 +107,14 @@ export default function Preview({ back }: Props) {
 
         <StyledDisplaySmall
           label="Sender"
-          text={addressToShortString(senderAddress)}
-          Icon={() => <></>}
+          text=""
+          Icon={() => <AddressLinkAndCopy address={senderAddress} />}
         />
 
         <StyledDisplaySmall
           label="Receiver"
-          text={addressToShortString(receiverAddress)}
-          Icon={() => <></>}
+          text=""
+          Icon={() => <AddressLinkAndCopy address={receiverAddress} />}
         />
 
         <StyledDisplaySmall

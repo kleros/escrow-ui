@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { StyledDisplaySmall } from "components/Common/Form/StyledDisplaySmall";
-import { addressToShortString } from "utils/common";
 import { formatDeadlineDate } from "utils/transaction";
+import AddressLinkAndCopy from "components/Common/Display/AddressLinkAndCopy";
 
 const Container = styled.div`
   display: grid;
@@ -45,14 +45,14 @@ export default function Summary({
 
       <StyledDisplaySmall
         label="Sender"
-        text={addressToShortString(sender)}
-        Icon={() => <></>}
+        text=""
+        Icon={() => <AddressLinkAndCopy address={sender} />}
       />
 
       <StyledDisplaySmall
         label="Receiver"
-        text={addressToShortString(receiver)}
-        Icon={() => <></>}
+        text=""
+        Icon={() => <AddressLinkAndCopy address={receiver} />}
       />
 
       {/* Deadline is optional to maintain backwards compatibility with old frontend. */}

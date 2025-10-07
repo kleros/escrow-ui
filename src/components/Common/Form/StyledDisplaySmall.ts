@@ -13,4 +13,8 @@ export const StyledDisplaySmall = styled(DisplaySmall)`
   div {
     margin-top: 0;
   }
+
+  h2 {
+    font-weight: normal;
+  }
 `;
