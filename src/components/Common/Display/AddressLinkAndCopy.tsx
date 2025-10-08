@@ -13,7 +13,10 @@ const Container = styled.div`
   margin-left: -0.5rem;
 `;
 
-//NOTE: If in dev and using the Sepolia network, the link will still point to mainnet. This is fine because prod is only available on mainnet, so no need for any logic for dynamic linking.
+/*
+ * NOTE: If in dev and using the Sepolia network, the link will still point to mainnet. This is fine because prod is only available on mainnet, so no need for any logic for dynamic linking.
+ * Additionally, for existing transactions, there is no easy way to know the chain they are on, because there's no guarantee that that information will be in the metaevidence.
+ */
 export default function AddressLinkAndCopy({ address }: Props) {
   return (
     <Container>

@@ -57,7 +57,7 @@ export default function OngoingDisputeInfo({
         <br />
         You can also view the case in the{" "}
         <StyledA
-          href={`https://court.kleros.io/cases/${disputeId}`}
+          href={`https://court.kleros.io/cases/${disputeId}?requiredChainId=${chainId}`}
           {...defaultLinkProps}
         >
           Court.

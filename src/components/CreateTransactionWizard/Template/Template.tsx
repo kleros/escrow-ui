@@ -6,6 +6,7 @@ import GeneralServiceImage from "assets/general-service.png";
 import type { EscrowTemplate } from "model/EscrowTemplate";
 import { useState } from "react";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
+import { useAccount } from "wagmi";
 
 const ESCROW_TEMPLATES: EscrowTemplate[] = [
   {
@@ -89,6 +90,7 @@ interface Props {
 
 export default function Template({ next }: Props) {
   const { escrowType, setEscrowType } = useNewTransactionContext();
+  const { chainId } = useAccount();
   const [selectedTemplate, setSelectedTemplate] = useState<EscrowTemplate>(
     ESCROW_TEMPLATES.find((template) => template.title === escrowType) ??
       ESCROW_TEMPLATES[0]
@@ -123,7 +125,7 @@ export default function Template({ next }: Props) {
       <StyledCourt>
         Any disputes that may arise will be resolved in the{" "}
         <StyledA
-          href={`https://court.kleros.io/courts`}
+          href={`https://court.kleros.io/courts?requiredChainId=${chainId}`}
           target="_blank"
           rel="noopener noreferrer"
         >
