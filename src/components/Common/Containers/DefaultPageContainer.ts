@@ -7,5 +7,13 @@ export const DefaultPageContainer = styled.div`
   gap: 16px;
   align-items: center;
   overflow-y: auto;
-  padding: 8px 16px;
+  padding: 64px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    padding: 32px;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 16px;
+  }
 `;

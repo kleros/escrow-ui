@@ -77,6 +77,10 @@ const AmountTag = styled(Tag)`
   }
 `;
 
+const AddressTag = styled(Tag)`
+  pointer-events: none;
+`;
+
 interface Props {
   transaction: TransactionMini;
 }
@@ -106,7 +110,9 @@ export default function TransactionCard({ transaction }: Props) {
           <Description>{transaction.metaEvidence.description}</Description>
         </CardBody>
         <CardEdge>
-          <Tag text={addressToShortString(transaction.otherPartyAddress)} />
+          <AddressTag
+            text={addressToShortString(transaction.otherPartyAddress)}
+          />
           <p>{transaction.createdAt}</p>
         </CardEdge>
       </StyledCard>

@@ -10,7 +10,7 @@ const Container = styled.div`
   gap: 16px;
   align-items: center;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 32px 0;
 `;
 
 //NOTE: If trying to access this page directly with a Sepolia transaction and no wallet is connected to the network, you will see "Transaction not found".
