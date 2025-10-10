@@ -14,6 +14,7 @@ import { addressToShortString, getBlockExplorerLink } from "./common";
 import { type FormattedTransactionStatus } from "model/Transaction";
 import type { Evidence } from "model/Evidence";
 import { DisputeRuling } from "model/Dispute";
+import { TimelineEventVariant } from "model/TimelineEvent";
 
 export const mapTransactionStatus = (
   backendStatus: string,
@@ -61,6 +62,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
+          variant: TimelineEventVariant.Default,
         };
       case paymentEvent.name:
         return {
@@ -79,6 +81,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
+          variant: TimelineEventVariant.Payment,
         };
       case hasToPayFeeEvent.name:
         return {
@@ -86,7 +89,7 @@ export function formatTimelineEvents(
             event.args._party === 0
               ? addressToShortString(sender)
               : addressToShortString(receiver)
-          } has to pay fee`,
+          } has to deposit arbitration fee`,
           date: new Date(
             parseInt(blockTimestamps[index].toString()) * 1000
           ).toLocaleDateString("en-US", {
@@ -96,6 +99,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
+          variant: TimelineEventVariant.ActionRequired,
         };
       case disputeEvent.name:
         return {
@@ -108,6 +112,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
+          variant: TimelineEventVariant.Dispute,
         };
       case appealDecisionEvent.name:
         return {
@@ -121,6 +126,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
+          variant: TimelineEventVariant.Dispute,
         };
       case evidenceEvent.name: {
         const evidenceIndex = evidenceLogs.findIndex(
@@ -142,6 +148,7 @@ export function formatTimelineEvents(
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
           evidenceURI: evidence.fileURI,
+          variant: TimelineEventVariant.Evidence,
         };
       }
       case rulingEvent.name:
@@ -156,6 +163,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
+          variant: TimelineEventVariant.Ruling,
         };
     }
   });
@@ -170,4 +178,33 @@ export const formatDeadlineDate = (deadline: Date) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+//This function exists to provide the CustomTimeline component with appropriate HEX colors for events where the defaults are not enough (ActionRequired and Evidence).
+//For the others, we can rely on the component behavior by default.
+//Note that the colors used here match the theme variables directly, this is just to get the HEX value to pass to the CustomTimeline component instead of the CSS variable name.
+export const getFormattedTimelineVariant = (
+  themeMode: string,
+  variant: TimelineEventVariant
+) => {
+  switch (variant) {
+    case TimelineEventVariant.Payment:
+      //The CustomTimeline component is ready to handle "positive" events automatically, provided it receives the "accepted" string
+      return "accepted";
+    case TimelineEventVariant.ActionRequired:
+      //warning
+      return themeMode === "dark" ? "#ffc46b" : "#ff9900";
+    case TimelineEventVariant.Dispute:
+      //The CustomTimeline component is ready to handle "negative" events automatically, provided it receives the "refused" string
+      return "refused";
+    case TimelineEventVariant.Evidence:
+      //primaryPurple
+      return themeMode === "dark" ? "#7e1bd4" : "#4d00b4";
+    case TimelineEventVariant.Ruling:
+      //Same as the payment case
+      return "accepted";
+    default:
+      //The CustomTimeline component handles the default case automatically, we can just return undefined
+      return undefined;
+  }
 };

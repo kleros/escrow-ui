@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import {
   AlertMessage,
   Box,
@@ -15,6 +15,7 @@ import TitleAndType from "./TitleAndType/TitleAndType";
 import Header from "./Header/Header";
 import Summary from "./Summary/Summary";
 import Actions from "./Actions/Actions";
+import { getFormattedTimelineVariant } from "utils/transaction";
 
 const StyledSkeleton = styled(BaseSkeleton)`
   height: 100%;
@@ -64,6 +65,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
     contractAddress,
   });
 
+  const theme = useTheme();
   const { address } = useAccount();
 
   //This can be simplified if the CustomTimeline component is updated and no longer expects a tuple or exports the ICustomTimelineProps interface
@@ -101,10 +103,11 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
           )}
         </TimelinePartyContainer>
       ),
+      variant: getFormattedTimelineVariant(theme.mode, event.variant),
     }));
 
     return [...items] as TimelineItems;
-  }, [transaction]);
+  }, [transaction, theme]);
 
   const shouldShowActions = useMemo(() => {
     //Only show actions if the user is a party and the transaction is not completed
