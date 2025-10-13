@@ -10,7 +10,7 @@ export default function ConnectButton() {
       isDisabled={isOpen}
       small
       text={"Connect Wallet"}
-      onClick={async () => open({ view: "Connect" })}
+      onPress={async () => open({ view: "Connect" })}
     />
   );
 }

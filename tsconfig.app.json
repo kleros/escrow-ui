@@ -31,7 +31,10 @@
       "context/*": ["./src/context/*"],
       "hooks/*": ["./src/hooks/*"],
       "layout/*": ["./src/layout/*"],
-      "theme/*": ["./src/theme/*"]
+      "model/*": ["./src/model/*"],
+      "pages/*": ["./src/pages/*"],
+      "theme/*": ["./src/theme/*"],
+      "utils/*": ["./src/utils/*"]
     }
   },
   "include": ["src"]

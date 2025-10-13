@@ -1,4 +1,4 @@
-import { IconButton } from "components/common/IconButton";
+import { IconButton } from "components/Common/Buttons/IconButton";
 import styled from "styled-components";
 import Discord from "assets/discord.svg?react";
 import Blog from "assets/blog.svg?react";

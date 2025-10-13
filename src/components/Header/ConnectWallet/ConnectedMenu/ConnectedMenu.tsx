@@ -1,15 +1,19 @@
 import { Button, Tag } from "@kleros/ui-components-library";
 import { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
+import { addressToShortString } from "utils/common";
 import { useAccount, useDisconnect } from "wagmi";
 
 const Container = styled.div`
   position: relative;
 `;
 
-const CustomTag = styled(Tag)`
+const StyledTag = styled(Tag)`
   font-weight: bold;
   background-color: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &:hover {
     opacity: 0.8;
@@ -32,7 +36,7 @@ const MenuContainer = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.default};
 `;
 
-const CustomButton = styled(Button)`
+const StyledButton = styled(Button)`
   border: 0;
   background-color: transparent;
 
@@ -64,16 +68,14 @@ export default function ConnectedMenu() {
 
   return (
     <Container ref={containerRef}>
-      <CustomTag
+      <StyledTag
         active
-        text={`${chain?.name} | ${address?.slice(0, 6)}...${address?.slice(
-          -4
-        )}`}
+        text={`${chain?.name} | ${addressToShortString(address ?? "")}`}
         onPress={() => setIsMenuOpen(!isMenuOpen)}
       />
       {isMenuOpen && (
         <MenuContainer>
-          <CustomButton text="Disconnect" small onPress={() => disconnect()} />
+          <StyledButton text="Disconnect" small onPress={() => disconnect()} />
         </MenuContainer>
       )}
     </Container>
