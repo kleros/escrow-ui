@@ -217,6 +217,13 @@ export function useTransactions() {
               //Shouldn't happen, but if we did not get the details or the meta evidence, skip for now
               if (tx.status !== "success" || !metaEvidence) return null;
 
+              //Some txs may have wrong metaevidence. As an example, two possible scenarios:
+              //1. The old frontend uploads the metaevidence before the user is asked to submit the transaction. The user can, in the last step (after the metaevidence is uploaded), switch to a different wallet and submit the transaction.
+              //2. A user interacts with the contract directly and uploads badly formed metaevidence.
+              //For most information, we already default to the onchain data as the source of truth, but here it's best to manually replace the sender and receiver in the metaevidence object so it can be used throughout the app.
+              metaEvidence.sender = tx.result[0] as string;
+              metaEvidence.receiver = tx.result[1] as string;
+
               //Note we can rely on the order of batch fetches
               return mapToTransactionMini(
                 txIDs[index],

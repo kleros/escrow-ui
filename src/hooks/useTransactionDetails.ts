@@ -375,6 +375,10 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
 
       if (!metaEvidence) return undefined;
 
+      //See useTransactions.ts for why we do this
+      metaEvidence.sender = details[0] as string;
+      metaEvidence.receiver = details[1] as string;
+
       const amountInEscrow = formatUnits(
         details[2],
         (metaEvidence.token?.decimals as number) ?? 18
