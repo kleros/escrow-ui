@@ -15,7 +15,7 @@ import { waitForTransactionReceipt } from "viem/actions";
 import { useAccount, useClient } from "wagmi";
 import {
   StyledForm,
-  StyledNumberField,
+  StyledBigNumberField,
   StyledP,
 } from "../Common/StyledElements/StyledElements";
 import ErrorAlert from "../Common/ErrorAlert/ErrorAlert";
@@ -23,7 +23,7 @@ import ErrorAlert from "../Common/ErrorAlert/ErrorAlert";
 interface Props {
   transactionId: bigint;
   contractAddress: string;
-  escrowAmount: number;
+  escrowAmount: string;
   ticker: string;
   decimals: number;
 }
@@ -39,14 +39,14 @@ export default function Reimburse({
   const client = useClient();
   const { address } = useAccount();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [amount, setAmount] = useState<number>(escrowAmount);
+  const [amount, setAmount] = useState<string>(escrowAmount);
   const [isReimbursing, setIsReimbursing] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
   const transactionConfig = useMemo(() => {
     return {
       address: contractAddress as `0x${string}`,
-      args: [transactionId, parseUnits(amount.toString(), decimals)],
+      args: [transactionId, parseUnits(amount, decimals)],
       account: address,
       query: { enabled: false }, //Only simulate when we want
     } as const;
@@ -127,6 +127,17 @@ export default function Reimburse({
     }
   };
 
+  const validateAmount = (value: string) => {
+    const selectedAmount = Number(value);
+    if (selectedAmount === 0) {
+      return "Amount is required";
+    }
+    if (selectedAmount > 0 && selectedAmount <= Number(escrowAmount)) {
+      return true;
+    }
+    return "Amount must be greater than 0, but not greater than the escrow amount.";
+  };
+
   return (
     <>
       <StyledModal
@@ -147,25 +158,16 @@ export default function Reimburse({
         </p>
 
         <StyledForm onSubmit={handleReimburse}>
-          <StyledNumberField
+          <StyledBigNumberField
             value={amount}
-            onChange={(value) => setAmount(isNaN(value) ? 0 : value)}
+            onChange={(value) => setAmount(value?.toString() ?? "0")}
             isRequired
             label="Amount to reimburse"
             name="amount"
             placeholder="Amount"
-            validate={(value) =>
-              value > 0 && value <= escrowAmount
-                ? true
-                : "Amount must be greater than 0, but not greater than the escrow amount."
-            }
-            minValue={0}
+            validate={(value) => validateAmount(value?.toString() ?? "0")}
+            minValue="0"
             showFieldError
-            formatOptions={{
-              //Prevent automatic rounding of very small amounts
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 18,
-            }}
           />
 
           <Button

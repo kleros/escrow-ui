@@ -1,4 +1,4 @@
-import { Form, NumberField } from "@kleros/ui-components-library";
+import { BigNumberField, Form } from "@kleros/ui-components-library";
 import styled from "styled-components";
 
 export const StyledForm = styled(Form)`
@@ -8,7 +8,7 @@ export const StyledForm = styled(Form)`
   align-items: center;
 `;
 
-export const StyledNumberField = styled(NumberField)`
+export const StyledBigNumberField = styled(BigNumberField)`
   width: 100%;
 `;
 

@@ -1,4 +1,4 @@
-import { Button, NumberField, TextField } from "@kleros/ui-components-library";
+import { BigNumberField, Button, TextField } from "@kleros/ui-components-library";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
 import styled from "styled-components";
 import { validateAddress } from "utils/common";
@@ -27,7 +27,7 @@ const AmountAndTokenContainer = styled.div`
   }
 `;
 
-const StyledNumberField = styled(NumberField)`
+const StyledBigNumberField = styled(BigNumberField)`
   width: 242px;
 
   ${mobileResponsive}
@@ -84,22 +84,17 @@ export default function Details({ next, back }: Props) {
       />
 
       <AmountAndTokenContainer>
-        <StyledNumberField
+        <StyledBigNumberField
           value={amount}
-          onChange={(value) => setAmount(value)}
+          onChange={(value) => setAmount(value.toString())}
           isRequired
           label="Amount"
           name="amount"
           placeholder="Amount"
           validate={(value) =>
-            value > 0 ? true : "Amount must be greater than 0"
+            Number(value) > 0 ? true : "Amount must be greater than 0"
           }
           showFieldError
-          formatOptions={{
-            //Prevent automatic rounding of very small amounts
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 18,
-          }}
         />
 
         <TokenSelector />

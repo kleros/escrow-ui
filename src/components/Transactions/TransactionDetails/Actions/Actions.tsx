@@ -104,7 +104,7 @@ export default function Actions({ transaction, isBuyer }: Props) {
           <Pay
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
-            escrowAmount={Number(transaction.amountInEscrow)}
+            escrowAmount={transaction.amountInEscrow}
             ticker={transaction.metaEvidence.token?.ticker ?? "ETH"}
             decimals={Number(transaction.metaEvidence.token?.decimals ?? 18)}
             onlyFullPayment={onlyFullPayment}
@@ -115,7 +115,7 @@ export default function Actions({ transaction, isBuyer }: Props) {
           <Reimburse
             transactionId={transaction.id}
             contractAddress={transaction.arbitrableAddress}
-            escrowAmount={Number(transaction.amountInEscrow)}
+            escrowAmount={transaction.amountInEscrow}
             ticker={transaction.metaEvidence.token?.ticker ?? "ETH"}
             decimals={Number(transaction.metaEvidence.token?.decimals ?? 18)}
           />
