@@ -21,7 +21,7 @@ export const NewTransactionProvider: React.FC<{
   const [agreementFile, setAgreementFile] = useState<File>();
   const [senderAddress, setSenderAddress] = useState<string>("");
   const [receiverAddress, setReceiverAddress] = useState<string>("");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>("0");
   const [token, setToken] = useState<EscrowToken>(ETH_TOKEN);
   const [userAddedTokens, setUserAddedTokens] = useState<EscrowToken[]>([]);
   const [deadline, setDeadline] = useState<string>(getDefaultDeadline());
@@ -34,7 +34,7 @@ export const NewTransactionProvider: React.FC<{
     setAgreementFile(undefined);
     setSenderAddress(address ?? "");
     setReceiverAddress("");
-    setAmount(0);
+    setAmount("0");
     setToken(ETH_TOKEN);
     setUserAddedTokens([]);
     setDeadline(getDefaultDeadline());

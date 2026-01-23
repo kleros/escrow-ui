@@ -68,7 +68,7 @@ export function useCreateTransaction() {
     ? MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ADDRESS[chain!.id]?.[court]
     : MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS[chain!.id]?.[court];
 
-  const formattedAmount = parseUnits(amount.toString(), token.decimals);
+  const formattedAmount = parseUnits(amount, token.decimals);
   const deadlineDate = parseZonedDateTime(deadline).toDate();
   const formattedDeadline = deadlineDate.toISOString();
 
@@ -89,7 +89,7 @@ export function useCreateTransaction() {
     //Create and upload meta evidence to IPFS
     const metaEvidenceURI = await uploadMetaEvidence({
       agreementFileURI,
-      amount: amount.toString(),
+      amount,
       arbitrableAddress: contractAddress,
       description,
       deadline: formattedDeadline,

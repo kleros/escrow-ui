@@ -16,8 +16,8 @@ interface INewTransactionContext {
   setSenderAddress: (address: string) => void;
   receiverAddress: string;
   setReceiverAddress: (address: string) => void;
-  amount: number;
-  setAmount: (amount: number) => void;
+  amount: string;
+  setAmount: (amount: string) => void;
   token: EscrowToken;
   setToken: (token: EscrowToken) => void;
   userAddedTokens: EscrowToken[];
@@ -40,7 +40,7 @@ export const NewTransactionContext = createContext<INewTransactionContext>({
   setSenderAddress: () => {},
   receiverAddress: "",
   setReceiverAddress: () => {},
-  amount: 0,
+  amount: "0",
   setAmount: () => {},
   token: ETH_TOKEN,
   setToken: () => {},
