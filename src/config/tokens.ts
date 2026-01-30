@@ -4,7 +4,6 @@ import ETH_LOGO from "assets/eth.png";
 import PNK_LOGO from "assets/pnk.png";
 import WETH_LOGO from "assets/weth.png";
 import USDC_LOGO from "assets/usdc.png";
-import USDT_LOGO from "assets/usdt.png";
 import DAI_LOGO from "assets/dai.png";
 import GNO_LOGO from "assets/gno.png";
 import POL_LOGO from "assets/pol.png";
@@ -42,14 +41,6 @@ const USDC_TOKEN: EscrowToken = {
   ticker: "USDC",
   address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
   logo: USDC_LOGO,
-  decimals: 6,
-};
-
-const USDT_TOKEN: EscrowToken = {
-  name: "Tether USD",
-  ticker: "USDT",
-  address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-  logo: USDT_LOGO,
   decimals: 6,
 };
 
@@ -125,7 +116,6 @@ export function getEscrowTokens(chainId: number): EscrowToken[] {
         PNK_TOKEN,
         WETH_TOKEN,
         USDC_TOKEN,
-        USDT_TOKEN,
         DAI_TOKEN,
         GNO_TOKEN,
         POL_TOKEN,
