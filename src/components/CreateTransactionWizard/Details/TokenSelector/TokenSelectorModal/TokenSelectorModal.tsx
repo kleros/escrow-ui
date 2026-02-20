@@ -1,4 +1,4 @@
-import { Searchbar } from "@kleros/ui-components-library";
+import { AlertMessage, Searchbar } from "@kleros/ui-components-library";
 import type { EscrowToken } from "model/EscrowToken";
 import { useMemo, useState } from "react";
 import styled from "styled-components";
@@ -77,6 +77,12 @@ export default function TokenSelectorModal({
 
   return (
     <StyledModal isOpen={isOpen} isDismissable onOpenChange={handleOpenChange}>
+      <AlertMessage
+        className="p-4"
+        title=""
+        msg="Note that non standard ERC20 tokens, such as USDT, are not supported."
+        variant="warning"
+      />
       <StyledP>Add custom token</StyledP>
       <AddCustomToken
         existingTokens={escrowTokens}
