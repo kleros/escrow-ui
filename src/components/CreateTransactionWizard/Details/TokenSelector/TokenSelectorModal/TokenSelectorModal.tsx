@@ -83,6 +83,7 @@ export default function TokenSelectorModal({
         msg="Note that non standard ERC20 tokens, such as USDT, are not supported."
         variant="warning"
       />
+
       <StyledP>Add custom token</StyledP>
       <AddCustomToken
         existingTokens={escrowTokens}

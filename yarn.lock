@@ -6342,6 +6342,7 @@ __metadata:
     react-countdown: "npm:^2.3.6"
     react-dom: "npm:^18.2.55"
     react-router: "npm:^7.10.1"
+    react-toastify: "npm:^11.0.5"
     styled-components: "npm:^6.1.18"
     typescript: "npm:~5.8.3"
     typescript-eslint: "npm:^8.30.1"
@@ -8713,6 +8714,18 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
   checksum: 10c0/d886304be1c52d36797f41696f3e5355ecf288a54fde2bde1ebf1d7eb77cf89e7d3829a61115c7df2c083bd77b26bc99dbd79abaf9c06acaaec7ae512d97e9b4
+  languageName: node
+  linkType: hard
+
+"react-toastify@npm:^11.0.5":
+  version: 11.0.5
+  resolution: "react-toastify@npm:11.0.5"
+  dependencies:
+    clsx: "npm:^2.1.1"
+  peerDependencies:
+    react: ^18 || ^19
+    react-dom: ^18 || ^19
+  checksum: 10c0/50f5b81323ebb1957b2efd0963fac24aa1407155d16ab756ffd6d0f42f8af17e796b3958a9fce13e9d1b945d6c3a5a9ebf13529478474d8a2af4bf1dd0db67d2
   languageName: node
   linkType: hard
 
