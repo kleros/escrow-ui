@@ -130,3 +130,9 @@ export function getEscrowTokens(chainId: number): EscrowToken[] {
       return [ETH_TOKEN];
   }
 }
+
+//Only relevant for Mainnet, Sepolia is for testing, so no blacklisted tokens
+//Addresses added to this list should be in lowercase
+export const BLACKLISTED_TOKENS = [
+  "0xdac17f958d2ee523a2206206994597c13d831ec7" //USDT
+];

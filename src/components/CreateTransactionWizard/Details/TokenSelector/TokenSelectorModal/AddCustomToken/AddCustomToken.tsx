@@ -7,6 +7,8 @@ import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { validateAddress } from "utils/common";
 import { useAccount } from "wagmi";
+import { BLACKLISTED_TOKENS } from "config/tokens";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   display: flex;
@@ -52,6 +54,10 @@ export default function AddCustomToken({ existingTokens, onAddToken }: Props) {
     )
       return;
 
+    if (BLACKLISTED_TOKENS.includes(tokenAddress.toLowerCase())) {
+      toast.error("This token is not supported, most likely because it does not follow the ERC20 standard. Please use a different token.")
+      return;
+    }
     const tokenMetadata =
       await alchemyInstance.core.getTokenMetadata(tokenAddress);
 
