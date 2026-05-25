@@ -8,6 +8,7 @@ import {
   useWriteMultipleArbitrableTokenTransactionCreateTransaction,
   useWriteMultipleArbitrableTransactionCreateTransaction,
 } from "config/contracts/generated";
+import { useAtlasProvider, Roles } from "@kleros/kleros-app";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
 import { parseUnits, zeroAddress, erc20Abi, decodeEventLog } from "viem";
 import {
@@ -26,14 +27,14 @@ import {
   nativeTransactionCreatedEvent,
   tokenTrasactionCreatedEvent,
 } from "config/contracts/events";
-import { ipfsPost } from "utils/ipfs";
-import { uploadMetaEvidence } from "utils/metaEvidence";
+import { buildMetaEvidence } from "utils/metaEvidence";
 import { isUserRejectedRequestError } from "utils/common";
 
 export function useCreateTransaction() {
   const client = useClient();
   const navigate = useNavigate();
   const { chain } = useAccount();
+  const { uploadFile } = useAtlasProvider();
   const {
     agreementFile,
     amount,
@@ -83,11 +84,11 @@ export function useCreateTransaction() {
   const handleIPFSUploads = async () => {
     //Upload agreement file to IPFS, if it exists
     const agreementFileURI = agreementFile
-      ? await ipfsPost(agreementFile.name, agreementFile)
+      ? await uploadFile(agreementFile, Roles.Evidence)
       : undefined;
 
-    //Create and upload meta evidence to IPFS
-    const metaEvidenceURI = await uploadMetaEvidence({
+    //Build and upload meta evidence to IPFS
+    const metaEvidence = buildMetaEvidence({
       agreementFileURI,
       amount,
       arbitrableAddress: contractAddress,
@@ -100,6 +101,17 @@ export function useCreateTransaction() {
       title,
       token,
     });
+
+    const metaEvidenceFile = new File(
+      [JSON.stringify(metaEvidence)],
+      "metaEvidence.json",
+      { type: "application/json" }
+    );
+
+    const metaEvidenceURI = await uploadFile(metaEvidenceFile, Roles.Policy);
+    if (!metaEvidenceURI) {
+      throw new Error("Failed to upload meta evidence to IPFS");
+    }
 
     return metaEvidenceURI;
   };

@@ -11,11 +11,14 @@
     "generate": "wagmi generate"
   },
   "dependencies": {
+    "@kleros/kleros-app": "^2.2.2",
     "@kleros/ui-components-library": "^3.6.0",
     "@reown/appkit": "^1.7.6",
     "@reown/appkit-adapter-wagmi": "^1.7.6",
     "@tanstack/react-query": "^5.76.1",
     "alchemy-sdk": "^3.6.1",
+    "graphql": "^16.14.0",
+    "graphql-request": "^7.4.0",
     "react": "^18.2.55",
     "react-countdown": "^2.3.6",
     "react-dom": "^18.2.55",

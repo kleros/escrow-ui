@@ -1,26 +1,4 @@
-import { IPFS_UPLOAD_URL, IPFS_GATEWAY_URL } from "config/ipfs";
-
-export async function ipfsPost(
-  fileName: string,
-  data: string | Blob
-): Promise<string> {
-  const payload = new FormData();
-  payload.append("file", new Blob([data]), fileName);
-
-  const url = `${IPFS_UPLOAD_URL}?operation=evidence&pinToGraph=false`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: payload,
-  });
-
-  if (!response.ok) {
-    throw new Error(`IPFS post failed with status ${response.status}`);
-  }
-
-  const result = await response.json();
-  return result.cids[0];
-}
+import { IPFS_GATEWAY_URL } from "config/ipfs";
 
 export async function ipfsFetch(uri: string): Promise<unknown> {
   try {
