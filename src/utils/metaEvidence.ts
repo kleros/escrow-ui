@@ -1,6 +1,5 @@
 import type { EscrowToken } from "model/EscrowToken";
 import { type MetaEvidence } from "model/MetaEvidence";
-import { ipfsPost } from "./ipfs";
 
 const defaultMetaEvidenceFields = {
   category: "Escrow",
@@ -17,8 +16,8 @@ const defaultMetaEvidenceFields = {
     "/ipfs/QmfPnVdcCjApHdiCC8wAmyg5iR246JvVuQGQjQYgtF8gZU/index.html",
 };
 
-interface UploadMetaEvidenceProps {
-  agreementFileURI?: string;
+interface BuildMetaEvidenceProps {
+  agreementFileURI?: string | null;
   amount: string;
   arbitrableAddress: string;
   description: string;
@@ -31,7 +30,7 @@ interface UploadMetaEvidenceProps {
   token: EscrowToken;
 }
 
-export async function uploadMetaEvidence({
+export function buildMetaEvidence({
   agreementFileURI,
   amount,
   arbitrableAddress,
@@ -43,8 +42,8 @@ export async function uploadMetaEvidence({
   escrowType,
   title,
   token,
-}: UploadMetaEvidenceProps) {
-  const metaEvidence: MetaEvidence = {
+}: BuildMetaEvidenceProps): MetaEvidence {
+  return {
     ...defaultMetaEvidenceFields,
     arbitrableAddress,
     aliases: {
@@ -69,13 +68,6 @@ export async function uploadMetaEvidence({
       ticker: token.ticker,
       symbolURI: token.logo,
     },
-    ...(agreementFileURI ? { fileURI: agreementFileURI } : {}),
+    ...(agreementFileURI && { fileURI: agreementFileURI }),
   };
-
-  const metaEvidenceURI = await ipfsPost(
-    "metaEvidence.json",
-    JSON.stringify(metaEvidence)
-  );
-
-  return metaEvidenceURI;
 }
