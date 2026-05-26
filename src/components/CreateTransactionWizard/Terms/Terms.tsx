@@ -131,11 +131,19 @@ export default function Terms({ next, back }: Props) {
         <StyledFileUploader
           callback={setAgreementFile}
           selectedFile={agreementFile}
+          msg="Maximum file size is 20MB."
           acceptedFileTypes={["application/pdf"]}
           validationFunction={(file) => {
             if (!file || file.type !== "application/pdf") {
               return false;
             }
+
+            //Atlas max file size for Roles.Evidence is 20MB
+            const MAX_FILE_SIZE_MB = 20;
+            if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+              return false;
+            }
+
             return true;
           }}
         />
