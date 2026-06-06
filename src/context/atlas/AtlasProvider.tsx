@@ -14,6 +14,7 @@ export const AtlasProvider: React.FC<{ children: React.ReactNode }> = ({
     <DefaultAtlasProvider
       config={{
         uri: import.meta.env.VITE_ATLAS_URI,
+        //Irrelevant in EscrowV1 for now, but needed to satisfy the type
         signupProduct: SignupProduct.CourtV1,
         ipfsProduct: IpfsProduct.Escrow,
         wagmiConfig,
