@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { getIpfsUrl } from "utils/ipfs";
+import { isSafeUrl } from "utils/urlValidation";
 import DocIcon from "assets/doc.svg?react";
 
 const StyledP = styled.p`
@@ -42,18 +43,19 @@ export default function Agreement({
   agreementDocURI,
   useIpfs = true,
 }: Props) {
+  const documentUrl = agreementDocURI
+    ? getDocumentUrl(agreementDocURI, useIpfs)
+    : undefined;
+  const isDocumentUrlSafe = !useIpfs || isSafeUrl(documentUrl);
+
   return (
     <>
       <StyledP>Terms</StyledP>
 
       <Description>{description}</Description>
 
-      {agreementDocURI && (
-        <StyledA
-          href={getDocumentUrl(agreementDocURI, useIpfs)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+      {documentUrl && isDocumentUrlSafe && (
+        <StyledA href={documentUrl} target="_blank" rel="noopener noreferrer">
           <DocIcon />
           <p>Contract details</p>
         </StyledA>
