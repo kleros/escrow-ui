@@ -8,6 +8,8 @@ import { useTransactionDetails } from "hooks/useTransactionDetails";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { getIpfsUrl } from "utils/ipfs";
+import { isSafeUrl } from "utils/urlValidation";
+import SafeLink from "components/Common/Display/SafeLink";
 import { DefaultDivider } from "components/Common/Dividers/DefaultDivider";
 import { BaseSkeleton } from "components/Common/Skeleton/BaseSkeleton";
 import Agreement from "./Agreement/Agreement";
@@ -35,6 +37,15 @@ const StyledBox = styled(Box)`
 `;
 
 const StyledA = styled.a`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.secondaryText};
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const StyledSafeLink = styled(SafeLink)`
   font-size: 12px;
   color: ${({ theme }) => theme.colors.secondaryText};
 
@@ -80,31 +91,38 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
       ];
     }
 
-    const items = transaction.timeline.map((event) => ({
-      title: event.title,
-      subtitle: event.date,
-      party: (
-        <TimelinePartyContainer>
-          <StyledA href={event.txURL} target="_blank" rel="noopener noreferrer">
-            View transaction
-          </StyledA>
+    const items = transaction.timeline.map((event) => {
+      const evidenceUrl = event.evidenceURI
+        ? getIpfsUrl(event.evidenceURI)
+        : undefined;
+      const isEvidenceUrlSafe = isSafeUrl(evidenceUrl);
 
-          {event.evidenceURI && (
-            <>
-              <StyledSpan>|</StyledSpan>
-              <StyledA
-                href={getIpfsUrl(event.evidenceURI)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View evidence
-              </StyledA>
-            </>
-          )}
-        </TimelinePartyContainer>
-      ),
-      variant: getFormattedTimelineVariant(theme.mode, event.variant),
-    }));
+      return {
+        title: event.title,
+        subtitle: event.date,
+        party: (
+          <TimelinePartyContainer>
+            <StyledA
+              href={event.txURL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View transaction
+            </StyledA>
+
+            {evidenceUrl && (
+              <>
+                <StyledSpan>|</StyledSpan>
+                <StyledSafeLink url={evidenceUrl} isSafe={isEvidenceUrlSafe}>
+                  View evidence
+                </StyledSafeLink>
+              </>
+            )}
+          </TimelinePartyContainer>
+        ),
+        variant: getFormattedTimelineVariant(theme.mode, event.variant),
+      };
+    });
 
     return [...items] as TimelineItems;
   }, [transaction, theme]);
@@ -117,7 +135,7 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
       (transaction.metaEvidence.sender.toLowerCase() ===
         address?.toLowerCase() ||
         transaction.metaEvidence.receiver.toLowerCase() ===
-          address?.toLowerCase()) &&
+        address?.toLowerCase()) &&
       transaction.formattedStatus !== "Completed"
     );
   }, [transaction, address]);

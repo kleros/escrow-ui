@@ -6,6 +6,7 @@ import type { EscrowToken } from "model/EscrowToken";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { validateAddress } from "utils/common";
+import { isSafeUrl } from "utils/urlValidation";
 import { useAccount } from "wagmi";
 import { BLACKLISTED_TOKENS } from "config/tokens";
 import { toast } from "react-toastify";
@@ -65,7 +66,7 @@ export default function AddCustomToken({ existingTokens, onAddToken }: Props) {
       name: tokenMetadata.name ? tokenMetadata.name : "Unknown",
       ticker: tokenMetadata.symbol ? tokenMetadata.symbol : "Unknown",
       address: tokenAddress as `0x${string}`,
-      logo: tokenMetadata.logo ?? UnknownTokenLogo,
+      logo: isSafeUrl(tokenMetadata.logo) ? tokenMetadata.logo! : UnknownTokenLogo,
       decimals: tokenMetadata.decimals ?? 18,
     };
 
