@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { getIpfsUrl } from "utils/ipfs";
 import { isSafeUrl } from "utils/urlValidation";
+import SafeLink from "components/Common/Display/SafeLink";
 import { DefaultDivider } from "components/Common/Dividers/DefaultDivider";
 import { BaseSkeleton } from "components/Common/Skeleton/BaseSkeleton";
 import Agreement from "./Agreement/Agreement";
@@ -36,6 +37,15 @@ const StyledBox = styled(Box)`
 `;
 
 const StyledA = styled.a`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.secondaryText};
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const StyledSafeLink = styled(SafeLink)`
   font-size: 12px;
   color: ${({ theme }) => theme.colors.secondaryText};
 
@@ -100,16 +110,12 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
               View transaction
             </StyledA>
 
-            {evidenceUrl && isEvidenceUrlSafe && (
+            {evidenceUrl && (
               <>
                 <StyledSpan>|</StyledSpan>
-                <StyledA
-                  href={evidenceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <StyledSafeLink url={evidenceUrl} isSafe={isEvidenceUrlSafe}>
                   View evidence
-                </StyledA>
+                </StyledSafeLink>
               </>
             )}
           </TimelinePartyContainer>
