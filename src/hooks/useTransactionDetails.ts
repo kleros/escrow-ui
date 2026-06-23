@@ -261,7 +261,7 @@ function mapToTransaction(
   blockTimestamp: bigint,
   contractAddress: `0x${string}`,
   arbitrationInfo: ArbitrationInfo,
-  disputeInfo: DisputeInfo,
+  disputeInfo: DisputeInfo | undefined,
   metaEvidence: MetaEvidence,
   status: number,
   lastInteraction: number,
@@ -341,6 +341,10 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
       ]);
 
       const disputeId = details[details.length - 5];
+      const status = details[details.length - 1] as number;
+      const hasDispute =
+        status === TransactionStatus.DisputeCreated ||
+        status === TransactionStatus.Resolved;
 
       const timelineEventsLogs = await fetchTimelineEvents(
         client,
@@ -359,12 +363,14 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
 
       const [disputeInfo, metaEvidence, evidenceContent, blockTimestamps] =
         await Promise.all([
-          fetchDisputeInfo(
-            client,
-            disputeId as bigint,
-            arbitrationInfo.arbitratorAddress,
-            arbitrationInfo.arbitratorExtraData
-          ),
+          hasDispute
+            ? fetchDisputeInfo(
+                client,
+                disputeId as bigint,
+                arbitrationInfo.arbitratorAddress,
+                arbitrationInfo.arbitratorExtraData
+              )
+            : Promise.resolve(undefined),
           fetchMetaEvidenceContent(metaEvidenceLog),
           fetchEvidenceContent(evidenceLogs),
           fetchBlockTimestamps(
@@ -409,7 +415,7 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
         arbitrationInfo,
         disputeInfo,
         metaEvidence,
-        details[details.length - 1] as number, // status
+        status,
         Number(details[details.length - 2]), //last interaction
         amountInEscrow,
         blockExplorerLink,

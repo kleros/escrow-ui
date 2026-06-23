@@ -43,7 +43,7 @@ export interface TransactionMini extends BaseTransaction {
 //Used for detailed view
 export interface Transaction extends BaseTransaction {
   arbitrationInfo: ArbitrationInfo;
-  disputeInfo: DisputeInfo;
+  disputeInfo?: DisputeInfo;
   amountInEscrow: string;
   disputeId: bigint;
   blockExplorerLink: string;
