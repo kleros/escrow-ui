@@ -40,7 +40,7 @@ export const mapTransactionStatus = (
 export function formatTimelineEvents(
   timelineEvents: TimelineEventLogs,
   evidenceLogs: EvidenceLogs,
-  evidenceContent: Evidence[],
+  evidenceContent: (Evidence | null)[],
   blockTimestamps: bigint[],
   receiver: string,
   sender: string,
@@ -135,9 +135,13 @@ export function formatTimelineEvents(
         const evidence = evidenceContent[evidenceIndex];
 
         return {
-          title: `${addressToShortString(
-            event.args._party as string
-          )} submitted "${evidence.name}" as evidence`,
+          title: evidence
+            ? `${addressToShortString(
+                event.args._party as string
+              )} submitted "${evidence.name}" as evidence`
+            : `${addressToShortString(
+                event.args._party as string
+              )} submitted evidence`,
           date: new Date(
             parseInt(blockTimestamps[index].toString()) * 1000
           ).toLocaleDateString("en-US", {
@@ -147,7 +151,7 @@ export function formatTimelineEvents(
             day: "numeric",
           }),
           txURL: getBlockExplorerLink(event.transactionHash, chainId),
-          evidenceURI: evidence.fileURI,
+          evidenceURI: evidence?.fileURI,
           variant: TimelineEventVariant.Evidence,
         };
       }

@@ -7,7 +7,7 @@ import {
 import { useTransactionDetails } from "hooks/useTransactionDetails";
 import { useMemo } from "react";
 import { useAccount } from "wagmi";
-import { getIpfsUrl } from "utils/ipfs";
+import { isContentAddressed, toHttpUrl } from "utils/ipfs";
 import { isSafeUrl } from "utils/urlValidation";
 import SafeLink from "components/Common/Display/SafeLink";
 import { DefaultDivider } from "components/Common/Dividers/DefaultDivider";
@@ -93,9 +93,10 @@ export default function TransactionDetails({ id, contractAddress }: Props) {
 
     const items = transaction.timeline.map((event) => {
       const evidenceUrl = event.evidenceURI
-        ? getIpfsUrl(event.evidenceURI)
+        ? toHttpUrl(event.evidenceURI)
         : undefined;
-      const isEvidenceUrlSafe = isSafeUrl(evidenceUrl);
+      const isEvidenceUrlSafe =
+        isContentAddressed(event.evidenceURI) && isSafeUrl(evidenceUrl);
 
       return {
         title: event.title,
