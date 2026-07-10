@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { getIpfsUrl } from "utils/ipfs";
+import { isContentAddressed, toHttpUrl } from "utils/ipfs";
 import { isSafeUrl } from "utils/urlValidation";
 import SafeLink from "components/Common/Display/SafeLink";
 import DocIcon from "assets/doc.svg?react";
@@ -36,7 +36,7 @@ const getDocumentUrl = (uri: string, useIpfs: boolean) => {
     return uri;
   }
 
-  return getIpfsUrl(uri);
+  return toHttpUrl(uri);
 };
 
 export default function Agreement({
@@ -47,7 +47,8 @@ export default function Agreement({
   const documentUrl = agreementDocURI
     ? getDocumentUrl(agreementDocURI, useIpfs)
     : undefined;
-  const isDocumentUrlSafe = !useIpfs || isSafeUrl(documentUrl);
+  const isDocumentUrlSafe =
+    !useIpfs || (isContentAddressed(agreementDocURI) && isSafeUrl(documentUrl));
 
   return (
     <>

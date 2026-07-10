@@ -398,7 +398,7 @@ export function useTransactionDetails({ id, contractAddress }: Props) {
       const timelineEvents = formatTimelineEvents(
         timelineEventsLogs as TimelineEventLogs,
         evidenceLogs,
-        evidenceContent as Evidence[],
+        evidenceContent,
         blockTimestamps,
         metaEvidence.receiver,
         metaEvidence.sender,
