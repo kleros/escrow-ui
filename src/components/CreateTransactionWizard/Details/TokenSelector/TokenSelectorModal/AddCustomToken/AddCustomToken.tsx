@@ -99,8 +99,8 @@ export default function AddCustomToken({ existingTokens, onAddToken }: Props) {
       const tokenMetadata =
         await alchemyInstance.core.getTokenMetadata(tokenAddress);
 
-      //Means we couldn't get metadata from alchemy, so we throw an error and try the contract directly.
-      if (!tokenMetadata.name && !tokenMetadata.symbol) {
+      //Means alchemy metadata is missing or incomplete, so we throw an error and try the contract directly.
+      if (!tokenMetadata.name || !tokenMetadata.symbol) {
         throw new Error("No token metadata returned by alchemy");
       }
 
