@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
   MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ADDRESS,
   MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS,
@@ -196,25 +197,16 @@ export function useCreateTransaction() {
 
   //Every escrow contract version emits MetaEvidence on creation, and its _metaEvidenceID is the new escrow's ID.
   //Find it by emitter instead of by log position: the mainnet native contracts emit no TransactionCreated event, and some networks add protocol logs for ETH transfers.
-  const getEscrowIdFromReceipt = (
+  const getEscrowMetaEvidenceLogs = (
     receipt: TransactionReceipt,
     escrowAddress: `0x${string}`
-  ) => {
-    const metaEvidenceLogs = parseEventLogs({
+  ) =>
+    parseEventLogs({
       abi: [metaEvidenceEvent],
       logs: receipt.logs.filter((log) =>
         isAddressEqual(log.address, escrowAddress)
       ),
     });
-
-    if (metaEvidenceLogs.length !== 1) {
-      throw new Error(
-        `Expected 1 MetaEvidence event from the escrow contract, found ${metaEvidenceLogs.length}`
-      );
-    }
-
-    return metaEvidenceLogs[0].args._metaEvidenceID;
-  };
 
   const createTransaction = async () => {
     setError(undefined);
@@ -251,8 +243,9 @@ export function useCreateTransaction() {
       return;
     }
 
-    //Once the creation transaction is sent, the escrow may exist even if a later step fails, so asking the user to try again could create a duplicate escrow
-    let escrowMayExist = false;
+    //What is known about the escrow once the creation transaction is sent. If it may exist, a failure must not let the user submit it again.
+    let escrowStatus: "notSent" | "unconfirmed" | "notCreated" | "created" =
+      "notSent";
 
     try {
       const metaEvidenceURI = await handleIPFSUploads();
@@ -264,15 +257,24 @@ export function useCreateTransaction() {
       } else {
         txHash = await handleNativeEscrowCreation(metaEvidenceURI);
       }
-      escrowMayExist = true;
+      escrowStatus = "unconfirmed";
 
       const receipt = await waitForTransactionReceipt(client, { hash: txHash });
-      if (receipt.status === "reverted") {
-        escrowMayExist = false;
-        throw new Error("Escrow creation transaction reverted");
+
+      //No escrow was created if the transaction reverted, or if it succeeded without the escrow's MetaEvidence, which happens when it was cancelled or replaced in the wallet
+      const metaEvidenceLogs =
+        receipt.status === "success"
+          ? getEscrowMetaEvidenceLogs(receipt, contractAddress)
+          : [];
+      escrowStatus = metaEvidenceLogs.length > 0 ? "created" : "notCreated";
+
+      if (metaEvidenceLogs.length !== 1) {
+        throw new Error(
+          `Expected 1 MetaEvidence event from the escrow contract, found ${metaEvidenceLogs.length}`
+        );
       }
 
-      const txID = getEscrowIdFromReceipt(receipt, contractAddress);
+      const txID = metaEvidenceLogs[0].args._metaEvidenceID;
 
       setIsCreating(false);
       resetContext();
@@ -283,12 +285,22 @@ export function useCreateTransaction() {
       //Log the error to the console for debugging purposes
       console.error(error);
 
-      if (escrowMayExist) {
-        setError(
-          "Your escrow was created, but we couldn't open it automatically. You can find it in your transactions."
+      //The escrow exists or may exist: clear the form and show the user's transactions, so the same escrow cannot be submitted twice
+      if (escrowStatus === "created" || escrowStatus === "unconfirmed") {
+        setIsCreating(false);
+        resetContext();
+        navigate("/");
+        toast.warn(
+          escrowStatus === "created"
+            ? "Your escrow was created, but we couldn't open it automatically. You can find it in your transactions."
+            : "Your transaction was sent, but we couldn't confirm it. Check your transactions before trying again.",
+          { autoClose: false }
         );
-      } else if (!isUserRejectedRequestError(error)) {
-        //Do not show error if user rejected the request
+        return;
+      }
+
+      //Do not show error if user rejected the request
+      if (!isUserRejectedRequestError(error)) {
         setError(
           "Please verify your inputs and try again. If the error persists, please reach out via Discord or Telegram."
         );
