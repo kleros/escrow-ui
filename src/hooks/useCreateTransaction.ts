@@ -10,7 +10,14 @@ import {
 } from "config/contracts/generated";
 import { useAtlasProvider, Roles } from "@kleros/kleros-app";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
-import { parseUnits, zeroAddress, erc20Abi, decodeEventLog } from "viem";
+import {
+  parseUnits,
+  zeroAddress,
+  erc20Abi,
+  isAddressEqual,
+  parseEventLogs,
+  type TransactionReceipt,
+} from "viem";
 import {
   readContract,
   simulateContract,
@@ -23,10 +30,7 @@ import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
 import { wagmiConfig } from "config/reown";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
-import {
-  nativeTransactionCreatedEvent,
-  tokenTrasactionCreatedEvent,
-} from "config/contracts/events";
+import { metaEvidenceEvent } from "config/contracts/events";
 import { buildMetaEvidence } from "utils/metaEvidence";
 import { isUserRejectedRequestError } from "utils/common";
 
@@ -190,23 +194,26 @@ export function useCreateTransaction() {
     return txHash;
   };
 
-  const handleTransactionReceipt = async (txHash: `0x${string}`) => {
-    const receipt = await waitForTransactionReceipt(client!, { hash: txHash });
-
-    //Get the transaction created event abi and the index of the log in the receipt
-    const [transactionCreatedEventAbi, transactionCreatedEventIndex] =
-      isTokenTransaction
-        ? [tokenTrasactionCreatedEvent, 2]
-        : [nativeTransactionCreatedEvent, 1];
-
-    const event = decodeEventLog({
-      abi: [transactionCreatedEventAbi],
-      strict: false,
-      data: receipt.logs[transactionCreatedEventIndex].data,
-      topics: receipt.logs[transactionCreatedEventIndex].topics,
+  //Every escrow contract version emits MetaEvidence on creation, and its _metaEvidenceID is the new escrow's ID.
+  //Find it by emitter instead of by log position: the mainnet native contracts emit no TransactionCreated event, and some networks add protocol logs for ETH transfers.
+  const getEscrowIdFromReceipt = (
+    receipt: TransactionReceipt,
+    escrowAddress: `0x${string}`
+  ) => {
+    const metaEvidenceLogs = parseEventLogs({
+      abi: [metaEvidenceEvent],
+      logs: receipt.logs.filter((log) =>
+        isAddressEqual(log.address, escrowAddress)
+      ),
     });
 
-    return event.args._transactionID;
+    if (metaEvidenceLogs.length !== 1) {
+      throw new Error(
+        `Expected 1 MetaEvidence event from the escrow contract, found ${metaEvidenceLogs.length}`
+      );
+    }
+
+    return metaEvidenceLogs[0].args._metaEvidenceID;
   };
 
   const createTransaction = async () => {
@@ -244,6 +251,9 @@ export function useCreateTransaction() {
       return;
     }
 
+    //Once the creation transaction is sent, the escrow may exist even if a later step fails, so asking the user to try again could create a duplicate escrow
+    let escrowMayExist = false;
+
     try {
       const metaEvidenceURI = await handleIPFSUploads();
 
@@ -254,8 +264,15 @@ export function useCreateTransaction() {
       } else {
         txHash = await handleNativeEscrowCreation(metaEvidenceURI);
       }
+      escrowMayExist = true;
 
-      const txID = await handleTransactionReceipt(txHash);
+      const receipt = await waitForTransactionReceipt(client, { hash: txHash });
+      if (receipt.status === "reverted") {
+        escrowMayExist = false;
+        throw new Error("Escrow creation transaction reverted");
+      }
+
+      const txID = getEscrowIdFromReceipt(receipt, contractAddress);
 
       setIsCreating(false);
       resetContext();
@@ -266,8 +283,12 @@ export function useCreateTransaction() {
       //Log the error to the console for debugging purposes
       console.error(error);
 
-      //Do not show error if user rejected the request
-      if (!isUserRejectedRequestError(error)) {
+      if (escrowMayExist) {
+        setError(
+          "Your escrow was created, but we couldn't open it automatically. You can find it in your transactions."
+        );
+      } else if (!isUserRejectedRequestError(error)) {
+        //Do not show error if user rejected the request
         setError(
           "Please verify your inputs and try again. If the error persists, please reach out via Discord or Telegram."
         );
