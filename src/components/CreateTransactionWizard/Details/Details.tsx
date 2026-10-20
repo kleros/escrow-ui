@@ -94,6 +94,7 @@ export default function Details({ next, back }: Props) {
           validate={(value) =>
             Number(value) > 0 ? true : "Amount must be greater than 0"
           }
+          minValue="0"
           showFieldError
         />
 
