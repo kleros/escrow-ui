@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { matchPath, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
   MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ADDRESS,
   MULTIPLE_ARBITRABLE_TRANSACTION_ADDRESS,
@@ -10,7 +11,14 @@ import {
 } from "config/contracts/generated";
 import { useAtlasProvider, Roles } from "@kleros/kleros-app";
 import { useNewTransactionContext } from "context/newTransaction/useNewTransactionContext";
-import { parseUnits, zeroAddress, erc20Abi, decodeEventLog } from "viem";
+import {
+  parseUnits,
+  zeroAddress,
+  erc20Abi,
+  isAddressEqual,
+  parseEventLogs,
+  type TransactionReceipt,
+} from "viem";
 import {
   readContract,
   simulateContract,
@@ -23,10 +31,7 @@ import { BUFFER_PERIOD_IN_SECONDS } from "model/Transaction";
 import { wagmiConfig } from "config/reown";
 import { MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ABI } from "config/contracts/abi/mutlipleArbitrableTokenTransaction";
 import { MULTIPLE_ARBITRABLE_TRANSACTION_ABI } from "config/contracts/abi/multipleArbitrableTransaction";
-import {
-  nativeTransactionCreatedEvent,
-  tokenTrasactionCreatedEvent,
-} from "config/contracts/events";
+import { metaEvidenceEvent } from "config/contracts/events";
 import { buildMetaEvidence } from "utils/metaEvidence";
 import { isUserRejectedRequestError } from "utils/common";
 
@@ -190,24 +195,18 @@ export function useCreateTransaction() {
     return txHash;
   };
 
-  const handleTransactionReceipt = async (txHash: `0x${string}`) => {
-    const receipt = await waitForTransactionReceipt(client!, { hash: txHash });
-
-    //Get the transaction created event abi and the index of the log in the receipt
-    const [transactionCreatedEventAbi, transactionCreatedEventIndex] =
-      isTokenTransaction
-        ? [tokenTrasactionCreatedEvent, 2]
-        : [nativeTransactionCreatedEvent, 1];
-
-    const event = decodeEventLog({
-      abi: [transactionCreatedEventAbi],
-      strict: false,
-      data: receipt.logs[transactionCreatedEventIndex].data,
-      topics: receipt.logs[transactionCreatedEventIndex].topics,
+  //Every escrow contract version emits MetaEvidence on creation, and its _metaEvidenceID is the new escrow's ID.
+  //Find it by emitter instead of by log position: the mainnet native contracts emit no TransactionCreated event, and some networks add protocol logs for ETH transfers.
+  const getEscrowMetaEvidenceLogs = (
+    receipt: TransactionReceipt,
+    escrowAddress: `0x${string}`
+  ) =>
+    parseEventLogs({
+      abi: [metaEvidenceEvent],
+      logs: receipt.logs.filter((log) =>
+        isAddressEqual(log.address, escrowAddress)
+      ),
     });
-
-    return event.args._transactionID;
-  };
 
   const createTransaction = async () => {
     setError(undefined);
@@ -244,6 +243,10 @@ export function useCreateTransaction() {
       return;
     }
 
+    //What is known about the escrow once the creation transaction is sent. If it may exist, a failure must not let the user submit it again.
+    let escrowStatus: "notSent" | "unconfirmed" | "notCreated" | "created" =
+      "notSent";
+
     try {
       const metaEvidenceURI = await handleIPFSUploads();
 
@@ -254,8 +257,24 @@ export function useCreateTransaction() {
       } else {
         txHash = await handleNativeEscrowCreation(metaEvidenceURI);
       }
+      escrowStatus = "unconfirmed";
 
-      const txID = await handleTransactionReceipt(txHash);
+      const receipt = await waitForTransactionReceipt(client, { hash: txHash });
+
+      //No escrow was created if the transaction reverted, or if it succeeded without the escrow's MetaEvidence, which happens when it was cancelled or replaced in the wallet
+      const metaEvidenceLogs =
+        receipt.status === "success"
+          ? getEscrowMetaEvidenceLogs(receipt, contractAddress)
+          : [];
+      escrowStatus = metaEvidenceLogs.length > 0 ? "created" : "notCreated";
+
+      if (metaEvidenceLogs.length !== 1) {
+        throw new Error(
+          `Expected 1 MetaEvidence event from the escrow contract, found ${metaEvidenceLogs.length}`
+        );
+      }
+
+      const txID = metaEvidenceLogs[0].args._metaEvidenceID;
 
       setIsCreating(false);
       resetContext();
@@ -265,6 +284,25 @@ export function useCreateTransaction() {
     } catch (error) {
       //Log the error to the console for debugging purposes
       console.error(error);
+
+      //The escrow exists or may exist: clear the form and show the user's transactions, so the same escrow cannot be submitted twice
+      if (escrowStatus === "created" || escrowStatus === "unconfirmed") {
+        setIsCreating(false);
+        resetContext();
+
+        //Only take the user to their transactions if they are still on the create page, not if they navigated elsewhere while waiting
+        if (matchPath("/new", window.location.pathname)) {
+          navigate("/");
+        }
+
+        toast.warn(
+          escrowStatus === "created"
+            ? "Your escrow was created, but we couldn't open it automatically. You can find it in your transactions."
+            : "Your transaction was sent, but we couldn't confirm it. Check your transactions before trying again.",
+          { autoClose: false }
+        );
+        return;
+      }
 
       //Do not show error if user rejected the request
       if (!isUserRejectedRequestError(error)) {

@@ -35,20 +35,6 @@ export const rulingEvent = parseAbiItem(
 );
 export type RulingLogs = GetLogsReturnType<typeof rulingEvent>;
 
-export const nativeTransactionCreatedEvent = parseAbiItem(
-  "event TransactionCreated(uint _transactionID, address indexed _sender, address indexed _receiver, uint _amount)"
-);
-export type NativeTransactionCreatedLogs = GetLogsReturnType<
-  typeof nativeTransactionCreatedEvent
->;
-
-export const tokenTrasactionCreatedEvent = parseAbiItem(
-  "event TransactionCreated(uint _transactionID, address indexed _sender, address indexed _receiver, address _token, uint _amount)"
-);
-export type TokenTrasactionCreatedLogs = GetLogsReturnType<
-  typeof tokenTrasactionCreatedEvent
->;
-
 export type TimelineEventLogs =
   | MetaEvidenceLogs
   | PaymentLogs
@@ -57,6 +43,3 @@ export type TimelineEventLogs =
   | AppealDecisionLogs
   | EvidenceLogs
   | RulingLogs;
-
-export type ContractEventLogs = TimelineEventLogs &
-  (NativeTransactionCreatedLogs | TokenTrasactionCreatedLogs);
