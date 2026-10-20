@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { matchPath, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import {
   MULTIPLE_ARBITRABLE_TOKEN_TRANSACTION_ADDRESS,
@@ -289,7 +289,12 @@ export function useCreateTransaction() {
       if (escrowStatus === "created" || escrowStatus === "unconfirmed") {
         setIsCreating(false);
         resetContext();
-        navigate("/");
+
+        //Only take the user to their transactions if they are still on the create page, not if they navigated elsewhere while waiting
+        if (matchPath("/new", window.location.pathname)) {
+          navigate("/");
+        }
+
         toast.warn(
           escrowStatus === "created"
             ? "Your escrow was created, but we couldn't open it automatically. You can find it in your transactions."
